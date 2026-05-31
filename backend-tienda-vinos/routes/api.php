@@ -8,8 +8,6 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-// ── Endpoints públicos (frontend) ──────────────────────────────────────────
-
 // Home: destacados y descuentos
 Route::get('/home', [\App\Http\Controllers\HomeController::class, 'index']);
 
@@ -34,5 +32,6 @@ Route::prefix('v1/admin')->name('api.admin.')->group(function () {
 
     // Dashboard stats
     Route::get('dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index']);
+
 
 });

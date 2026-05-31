@@ -63,14 +63,13 @@
         </div>
         <!-- Íconos a la derecha -->
         <div class="w-1/3 flex justify-end items-center space-x-6">
-            <a href="{{ route('carrito.index') }}" class="relative group" title="Carrito" id="cart-link">
+
                 <span class="material-symbols-outlined text-[#2a0002] hover:opacity-80 active:scale-95 transition-all" data-icon="shopping_cart">shopping_cart</span>
                 @php $cartCount = count(session('carrito', [])); @endphp
                 <span id="cart-count" class="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full font-bold shadow-sm group-hover:scale-110 transition-transform {{ $cartCount > 0 ? '' : 'hidden' }}">
                     {{ $cartCount }}
                 </span>
             </a>
-            <a href="{{ route('admin.dashboard') }}" title="Panel de Administración" class="material-symbols-outlined text-[#2a0002] hover:opacity-80 active:scale-95 transition-all" data-icon="settings">settings</a>
             <button class="material-symbols-outlined text-[#2a0002] hover:opacity-80 active:scale-95 transition-all" title="Mi cuenta" data-icon="person">person</button>
         </div>
     </nav>
