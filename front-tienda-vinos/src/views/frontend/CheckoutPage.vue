@@ -1,6 +1,5 @@
 <template>
-  <AppLayout>
-    <main class="max-w-4xl mx-auto px-6 py-24">
+  <main class="max-w-4xl mx-auto px-6 py-24">
       <div class="bg-white shadow-2xl rounded-lg overflow-hidden border border-outline-variant/20">
         <!-- Header de la Factura -->
         <div class="bg-[#2a0002] p-12 text-white flex justify-between items-start">
@@ -93,14 +92,12 @@
         Al confirmar, se descontarán los productos de nuestro inventario.<br>
         Gracias por confiar en la curaduría de La Última Botella.
       </p>
-    </main>
-  </AppLayout>
+  </main>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import AppLayout from '@/layouts/AppLayout.vue'
 
 const router = useRouter()
 const carrito = ref({})

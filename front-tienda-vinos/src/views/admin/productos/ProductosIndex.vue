@@ -326,10 +326,12 @@
 <script setup>
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import axios from 'axios'
+import api from '@/services/api'
+import { useNotificationStore } from '@/stores/notifications'
 
 const route  = useRoute()
 const router = useRouter()
+const notif  = useNotificationStore()
 
 // ── Estado ────────────────────────────────────────────────────────────────────
 
@@ -424,8 +426,8 @@ function syncFromQuery() {
 
 async function fetchFormData() {
   try {
-    // GET /api/v1/admin/productos/create devuelve categorias, marcas y paises
-    const { data } = await axios.get('/api/v1/admin/productos/create')
+    // GET /api/v1/admin/productos-form-data devuelve categorias, marcas y paises
+    const { data } = await api.get('/admin/productos-form-data')
     categorias.value = data.categorias
     marcas.value     = data.marcas
     paises.value     = data.paises
@@ -440,7 +442,7 @@ async function fetchProductos() {
   error.value   = null
 
   try {
-    const { data } = await axios.get('/api/v1/admin/productos', {
+    const { data } = await api.get('/admin/productos', {
       params: {
         page:      pagination.currentPage,
         search:    filters.search    || undefined,
@@ -513,7 +515,8 @@ async function confirmDelete() {
   deleteModal.loading = true
 
   try {
-    await axios.delete(`/api/v1/admin/productos/${deleteModal.producto.id_producto}`)
+    await api.delete(`/admin/productos/${deleteModal.producto.id_producto}`)
+    notif.show('Producto eliminado de la bodega', 'success')
     closeDeleteModal()
     // Si la página actual queda vacía al borrar el último ítem, retroceder una página
     const isLastItemOnPage = productos.value.length === 1 && pagination.currentPage > 1
@@ -521,7 +524,7 @@ async function confirmDelete() {
     if (isLastItemOnPage) goToPage(pagination.currentPage - 1)
   } catch (e) {
     const msg = e.response?.data?.message ?? 'Error al eliminar el producto.'
-    alert(msg)  // reemplazar por un sistema de notificaciones (toast) si tienes uno
+    notif.show(msg, 'error')
   } finally {
     deleteModal.loading = false
   }

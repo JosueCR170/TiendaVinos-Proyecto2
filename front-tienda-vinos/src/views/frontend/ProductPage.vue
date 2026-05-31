@@ -1,5 +1,4 @@
 <template>
-  <AppLayout>
     <main class="max-w-screen-2xl mx-auto px-6 md:px-12 pt-12 pb-24">
       <!-- Migas de pan -->
       <nav class="mb-8 text-xs font-label uppercase tracking-widest text-on-surface/50">
@@ -202,14 +201,12 @@
           <p class="text-2xl text-on-surface-variant mt-4">Producto no encontrado</p>
         </div>
       </template>
-    </main>
-  </AppLayout>
+  </main>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import AppLayout from '@/layouts/AppLayout.vue'
 
 const route = useRoute()
 const producto = ref({})

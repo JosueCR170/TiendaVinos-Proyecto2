@@ -1,6 +1,5 @@
 <template>
-  <AppLayout>
-    <main class="max-w-screen-xl mx-auto px-6 md:px-12 py-24 min-h-[70vh]">
+  <main class="max-w-screen-xl mx-auto px-6 md:px-12 py-24 min-h-[70vh]">
       <header class="mb-16 border-b border-outline-variant/20 pb-8">
         <h1 class="font-headline text-5xl text-primary font-bold italic tracking-tight">Tu Bodega Personal</h1>
         <p class="text-on-surface/60 mt-4 font-body text-lg italic">Vinos seleccionados listos para ser descorchados.</p>
@@ -92,13 +91,11 @@
           </router-link>
         </div>
       </template>
-    </main>
-  </AppLayout>
+  </main>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import AppLayout from '@/layouts/AppLayout.vue'
 
 const carrito = ref({})
 
