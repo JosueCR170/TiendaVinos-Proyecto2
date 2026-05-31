@@ -30,17 +30,21 @@ class VariedadController extends Controller
         }
 
         $variedades = $query->paginate(10)->withQueryString();
-        return view('admin.variedades.index', compact('variedades'));
-    }
-
-    public function create()
-    {
-        return view('admin.variedades.create');
+        return response()->json([
+            'success' => true,
+            'data' => $variedades->items(),
+            'pagination' => [
+                'current_page' => $variedades->currentPage(),
+                'per_page' => $variedades->perPage(),
+                'total' => $variedades->total(),
+                'last_page' => $variedades->lastPage()
+            ]
+        ]);
     }
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'nombre' => 'required|max:100|unique:variedades,nombre',
             'tipo' => 'required|in:Tinta,Blanca,Aromatica',
             'descripcion' => 'nullable|max:500',
@@ -54,25 +58,29 @@ class VariedadController extends Controller
         ]);
 
         try {
-            Variedad::create($request->all());
-            return redirect()->route('admin.variedades.index')->with('success', 'Variedad creada con éxito.');
+            $variedad = Variedad::create($validated);
+            return response()->json([
+                'success' => true,
+                'message' => 'Variedad creada con éxito.',
+                'data' => $variedad
+            ], 201);
         } catch (QueryException $e) {
-            return redirect()->back()->withInput()->withErrors(['db_error' => 'Error al guardar la variedad en la base de datos.']);
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al guardar la variedad en la base de datos.'
+            ], 422);
         } catch (\Exception $e) {
-            return redirect()->back()->withInput()->withErrors(['error' => 'Ocurrió un error inesperado al crear la variedad.']);
+            return response()->json([
+                'success' => false,
+                'message' => 'Ocurrió un error inesperado al crear la variedad.'
+            ], 500);
         }
-    }
-
-    public function edit(Variedad $variedade)
-    {
-        $variedad = $variedade;
-        return view('admin.variedades.edit', compact('variedad'));
     }
 
     public function update(Request $request, Variedad $variedade)
     {
         $variedad = $variedade;
-        $request->validate([
+        $validated = $request->validate([
             'nombre' => 'required|max:100|unique:variedades,nombre,' . $variedad->id_variedad . ',id_variedad',
             'tipo' => 'required|in:Tinta,Blanca,Aromatica',
             'descripcion' => 'nullable|max:500',
@@ -86,12 +94,22 @@ class VariedadController extends Controller
         ]);
 
         try {
-            $variedad->update($request->all());
-            return redirect()->route('admin.variedades.index')->with('success', 'Variedad actualizada con éxito.');
+            $variedad->update($validated);
+            return response()->json([
+                'success' => true,
+                'message' => 'Variedad actualizada con éxito.',
+                'data' => $variedad
+            ]);
         } catch (QueryException $e) {
-            return redirect()->back()->withInput()->withErrors(['db_error' => 'Error al actualizar la variedad.']);
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar la variedad.'
+            ], 422);
         } catch (\Exception $e) {
-            return redirect()->back()->withInput()->withErrors(['error' => 'Ocurrió un error inesperado al actualizar la variedad.']);
+            return response()->json([
+                'success' => false,
+                'message' => 'Ocurrió un error inesperado al actualizar la variedad.'
+            ], 500);
         }
     }
 
@@ -100,15 +118,27 @@ class VariedadController extends Controller
         try {
             $productos = $variedade->productos()->count();
             if ($productos > 0) {
-                return redirect()->route('admin.variedades.index')->withErrors(['error' => 'No se puede eliminar "' . $variedade->nombre . '" porque tiene ' . $productos . ' producto(s) asociado(s).']);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No se puede eliminar "' . $variedade->nombre . '" porque tiene ' . $productos . ' producto(s) asociado(s).'
+                ], 409);
             }
 
             $variedade->delete();
-            return redirect()->route('admin.variedades.index')->with('success', 'Variedad eliminada con éxito.');
+            return response()->json([
+                'success' => true,
+                'message' => 'Variedad eliminada con éxito.'
+            ]);
         } catch (QueryException $e) {
-            return redirect()->route('admin.variedades.index')->withErrors(['error' => 'No se puede eliminar esta variedad porque tiene registros dependientes.']);
+            return response()->json([
+                'success' => false,
+                'message' => 'No se puede eliminar esta variedad porque tiene registros dependientes.'
+            ], 422);
         } catch (\Exception $e) {
-            return redirect()->route('admin.variedades.index')->withErrors(['error' => 'Ocurrió un error inesperado al eliminar la variedad.']);
+            return response()->json([
+                'success' => false,
+                'message' => 'Ocurrió un error inesperado al eliminar la variedad.'
+            ], 500);
         }
     }
 }

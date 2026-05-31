@@ -35,22 +35,22 @@ class MarcaController extends Controller
         }
 
         $marcas = $query->paginate(10)->withQueryString();
-        $countries = new CountryList();
-        $paises = $countries->getList('es');
 
-        return view('admin.marcas.index', compact('marcas', 'paises'));
-    }
-
-    public function create()
-    {
-        $countries = new CountryList();
-        $paises = $countries->getList('es');
-        return view('admin.marcas.create', compact('paises'));
+        return response()->json([
+            'success' => true,
+            'data' => $marcas->items(),
+            'pagination' => [
+                'current_page' => $marcas->currentPage(),
+                'per_page' => $marcas->perPage(),
+                'total' => $marcas->total(),
+                'last_page' => $marcas->lastPage()
+            ]
+        ]);
     }
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'nombre' => 'required|max:100|unique:marcas,nombre',
             'pais' => 'required|max:100',
             'descripcion' => 'nullable|max:500',
@@ -63,25 +63,28 @@ class MarcaController extends Controller
         ]);
 
         try {
-            Marca::create($request->all());
-            return redirect()->route('admin.marcas.index')->with('success', 'Marca creada con éxito.');
+            $marca = Marca::create($validated);
+            return response()->json([
+                'success' => true,
+                'message' => 'Marca creada con éxito.',
+                'data' => $marca
+            ], 201);
         } catch (QueryException $e) {
-            return redirect()->back()->withInput()->withErrors(['db_error' => 'Error al guardar la marca en la base de datos.']);
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al guardar la marca en la base de datos.'
+            ], 422);
         } catch (\Exception $e) {
-            return redirect()->back()->withInput()->withErrors(['error' => 'Ocurrió un error inesperado al crear la marca.']);
+            return response()->json([
+                'success' => false,
+                'message' => 'Ocurrió un error inesperado al crear la marca.'
+            ], 500);
         }
-    }
-
-    public function edit(Marca $marca)
-    {
-        $countries = new CountryList();
-        $paises = $countries->getList('es');
-        return view('admin.marcas.edit', compact('marca', 'paises'));
     }
 
     public function update(Request $request, Marca $marca)
     {
-        $request->validate([
+        $validated = $request->validate([
             'nombre' => 'required|max:100|unique:marcas,nombre,' . $marca->id_marca . ',id_marca',
             'pais' => 'required|max:100',
             'descripcion' => 'nullable|max:500',
@@ -94,12 +97,22 @@ class MarcaController extends Controller
         ]);
 
         try {
-            $marca->update($request->all());
-            return redirect()->route('admin.marcas.index')->with('success', 'Marca actualizada con éxito.');
+            $marca->update($validated);
+            return response()->json([
+                'success' => true,
+                'message' => 'Marca actualizada con éxito.',
+                'data' => $marca
+            ]);
         } catch (QueryException $e) {
-            return redirect()->back()->withInput()->withErrors(['db_error' => 'Error al actualizar la marca.']);
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar la marca.'
+            ], 422);
         } catch (\Exception $e) {
-            return redirect()->back()->withInput()->withErrors(['error' => 'Ocurrió un error inesperado al actualizar la marca.']);
+            return response()->json([
+                'success' => false,
+                'message' => 'Ocurrió un error inesperado al actualizar la marca.'
+            ], 500);
         }
     }
 
@@ -108,15 +121,27 @@ class MarcaController extends Controller
         try {
             $productos = $marca->productos()->count();
             if ($productos > 0) {
-                return redirect()->route('admin.marcas.index')->withErrors(['error' => 'No se puede eliminar "' . $marca->nombre . '" porque tiene ' . $productos . ' producto(s) asociado(s).']);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No se puede eliminar "' . $marca->nombre . '" porque tiene ' . $productos . ' producto(s) asociado(s).'
+                ], 409);
             }
 
             $marca->delete();
-            return redirect()->route('admin.marcas.index')->with('success', 'Marca eliminada con éxito.');
+            return response()->json([
+                'success' => true,
+                'message' => 'Marca eliminada con éxito.'
+            ]);
         } catch (QueryException $e) {
-            return redirect()->route('admin.marcas.index')->withErrors(['error' => 'No se puede eliminar esta marca porque tiene registros dependientes.']);
+            return response()->json([
+                'success' => false,
+                'message' => 'No se puede eliminar esta marca porque tiene registros dependientes.'
+            ], 422);
         } catch (\Exception $e) {
-            return redirect()->route('admin.marcas.index')->withErrors(['error' => 'Ocurrió un error inesperado al eliminar la marca.']);
+            return response()->json([
+                'success' => false,
+                'message' => 'Ocurrió un error inesperado al eliminar la marca.'
+            ], 500);
         }
     }
 }

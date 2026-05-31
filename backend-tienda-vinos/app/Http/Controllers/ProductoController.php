@@ -64,26 +64,22 @@ class ProductoController extends Controller
 
         $productos = $query->paginate(10)->withQueryString();
         
-        $categorias = Categoria::all();
-        $marcas = Marca::all();
-        $countries = new CountryList();
-        $paises = $countries->getList('es');
-
-        return view('admin.productos.index', compact('productos', 'categorias', 'marcas', 'paises'));
+        return response()->json([
+            'success' => true,
+            'data' => $productos->items(),
+            'pagination' => [
+                'current_page' => $productos->currentPage(),
+                'per_page' => $productos->perPage(),
+                'total' => $productos->total(),
+                'last_page' => $productos->lastPage()
+            ]
+        ]);
     }
 
-    public function create()
-    {
-        $categorias = Categoria::all();
-        $marcas = Marca::all();
-        $countries = new CountryList();
-        $paises = $countries->getList('es');
-        return view('admin.productos.create', compact('categorias', 'marcas', 'paises'));
-    }
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'nombre' => 'required|max:200',
             'id_categoria' => 'required|exists:categorias,id_categoria',
             'id_marca' => 'required|exists:marcas,id_marca',
@@ -116,30 +112,29 @@ class ProductoController extends Controller
         ]);
 
         try {
-            $data = $request->all();
-            $data['estado'] = $request->has('estado') ? 1 : 0;
-            
-            Producto::create($data);
-            return redirect()->route('admin.productos.index')->with('success', 'Producto creado con éxito.');
+            $validated['estado'] = $request->has('estado') ? 1 : 0;
+            $producto = Producto::create($validated);
+            return response()->json([
+                'success' => true,
+                'message' => 'Producto creado con éxito.',
+                'data' => $producto
+            ], 201);
         } catch (QueryException $e) {
-            return redirect()->back()->withInput()->withErrors(['db_error' => 'Error al guardar el producto en la base de datos. Verifique que los datos sean correctos.']);
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al guardar el producto en la base de datos. Verifique que los datos sean correctos.'
+            ], 422);
         } catch (\Exception $e) {
-            return redirect()->back()->withInput()->withErrors(['error' => 'Ocurrió un error inesperado al crear el producto. Intente nuevamente.']);
+            return response()->json([
+                'success' => false,
+                'message' => 'Ocurrió un error inesperado al crear el producto. Intente nuevamente.'
+            ], 500);
         }
-    }
-
-    public function edit(Producto $producto)
-    {
-        $categorias = Categoria::all();
-        $marcas = Marca::all();
-        $countries = new CountryList();
-        $paises = $countries->getList('es');
-        return view('admin.productos.edit', compact('producto', 'categorias', 'marcas', 'paises'));
     }
 
     public function update(Request $request, Producto $producto)
     {
-        $request->validate([
+        $validated = $request->validate([
             'nombre' => 'required|max:200',
             'id_categoria' => 'required|exists:categorias,id_categoria',
             'id_marca' => 'required|exists:marcas,id_marca',
@@ -172,15 +167,23 @@ class ProductoController extends Controller
         ]);
 
         try {
-            $data = $request->all();
-            $data['estado'] = $request->has('estado') ? 1 : 0;
-            
-            $producto->update($data);
-            return redirect()->route('admin.productos.index')->with('success', 'Producto actualizado con éxito.');
+            $validated['estado'] = $request->has('estado') ? 1 : 0;
+            $producto->update($validated);
+            return response()->json([
+                'success' => true,
+                'message' => 'Producto actualizado con éxito.',
+                'data' => $producto
+            ]);
         } catch (QueryException $e) {
-            return redirect()->back()->withInput()->withErrors(['db_error' => 'Error al actualizar el producto en la base de datos.']);
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar el producto en la base de datos.'
+            ], 422);
         } catch (\Exception $e) {
-            return redirect()->back()->withInput()->withErrors(['error' => 'Ocurrió un error inesperado al actualizar el producto.']);
+            return response()->json([
+                'success' => false,
+                'message' => 'Ocurrió un error inesperado al actualizar el producto.'
+            ], 500);
         }
     }
 
@@ -188,11 +191,20 @@ class ProductoController extends Controller
     {
         try {
             $producto->delete();
-            return redirect()->route('admin.productos.index')->with('success', 'Producto eliminado con éxito.');
+            return response()->json([
+                'success' => true,
+                'message' => 'Producto eliminado con éxito.'
+            ]);
         } catch (QueryException $e) {
-            return redirect()->route('admin.productos.index')->withErrors(['error' => 'No se puede eliminar el producto porque tiene registros asociados (ej. carritos de compra).']);
+            return response()->json([
+                'success' => false,
+                'message' => 'No se puede eliminar el producto porque tiene registros asociados (ej. carritos de compra).'
+            ], 422);
         } catch (\Exception $e) {
-            return redirect()->route('admin.productos.index')->withErrors(['error' => 'Ocurrió un error inesperado al eliminar el producto.']);
+            return response()->json([
+                'success' => false,
+                'message' => 'Ocurrió un error inesperado al eliminar el producto.'
+            ], 500);
         }
     }
 }

@@ -23,18 +23,16 @@ class CategoriaController extends Controller
               ->orderBy('nivel', 'asc');
 
         $categorias = $query->get();
-        return view('admin.categorias.index', compact('categorias'));
+        return response()->json([
+            'success' => true,
+            'data' => $categorias
+        ]);
     }
 
-    public function create(Request $request)
-    {
-        $categoriasPadre = Categoria::where('nivel', 1)->get();
-        return view('admin.categorias.create', compact('categoriasPadre', 'request'));
-    }
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'nombre' => 'required|max:100|unique:categorias,nombre',
             'nivel' => 'required|integer|in:1,2',
             'descripcion' => 'nullable|max:500',
@@ -50,24 +48,29 @@ class CategoriaController extends Controller
         ]);
 
         try {
-            Categoria::create($request->all());
-            return redirect()->route('admin.categorias.index')->with('success', 'Categoría creada con éxito.');
+            $categoria = Categoria::create($validated);
+            return response()->json([
+                'success' => true,
+                'message' => 'Categoría creada con éxito.',
+                'data' => $categoria
+            ], 201);
         } catch (QueryException $e) {
-            return redirect()->back()->withInput()->withErrors(['db_error' => 'Error al guardar la categoría en la base de datos. Verifique que los datos sean correctos.']);
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al guardar la categoría en la base de datos. Verifique que los datos sean correctos.'
+            ], 422);
         } catch (\Exception $e) {
-            return redirect()->back()->withInput()->withErrors(['error' => 'Ocurrió un error inesperado al crear la categoría.']);
+            return response()->json([
+                'success' => false,
+                'message' => 'Ocurrió un error inesperado al crear la categoría.'
+            ], 500);
         }
     }
 
-    public function edit(Categoria $categoria)
-    {
-        $categoriasPadre = Categoria::where('nivel', 1)->get();
-        return view('admin.categorias.edit', compact('categoria', 'categoriasPadre'));
-    }
 
     public function update(Request $request, Categoria $categoria)
     {
-        $request->validate([
+        $validated = $request->validate([
             'nombre' => 'required|max:100|unique:categorias,nombre,' . $categoria->id_categoria . ',id_categoria',
             'nivel' => 'required|integer|in:1,2',
             'descripcion' => 'nullable|max:500',
@@ -83,12 +86,22 @@ class CategoriaController extends Controller
         ]);
 
         try {
-            $categoria->update($request->all());
-            return redirect()->route('admin.categorias.index')->with('success', 'Categoría actualizada con éxito.');
+            $categoria->update($validated);
+            return response()->json([
+                'success' => true,
+                'message' => 'Categoría actualizada con éxito.',
+                'data' => $categoria
+            ]);
         } catch (QueryException $e) {
-            return redirect()->back()->withInput()->withErrors(['db_error' => 'Error al actualizar la categoría en la base de datos.']);
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar la categoría en la base de datos.'
+            ], 422);
         } catch (\Exception $e) {
-            return redirect()->back()->withInput()->withErrors(['error' => 'Ocurrió un error inesperado al actualizar la categoría.']);
+            return response()->json([
+                'success' => false,
+                'message' => 'Ocurrió un error inesperado al actualizar la categoría.'
+            ], 500);
         }
     }
 
@@ -98,21 +111,36 @@ class CategoriaController extends Controller
             // Verificar si tiene subcategorías asociadas
             $subcategorias = Categoria::where('nombre_padre', $categoria->id_categoria)->count();
             if ($subcategorias > 0) {
-                return redirect()->route('admin.categorias.index')->withErrors(['error' => 'No se puede eliminar esta categoría porque tiene ' . $subcategorias . ' subcategoría(s) asociada(s). Elimine primero las subcategorías.']);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No se puede eliminar esta categoría porque tiene ' . $subcategorias . ' subcategoría(s) asociada(s). Elimine primero las subcategorías.'
+                ], 409);
             }
 
             // Verificar si tiene productos asociados
             $productos = $categoria->productos()->count();
             if ($productos > 0) {
-                return redirect()->route('admin.categorias.index')->withErrors(['error' => 'No se puede eliminar esta categoría porque tiene ' . $productos . ' producto(s) asociado(s). Reasigne los productos primero.']);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No se puede eliminar esta categoría porque tiene ' . $productos . ' producto(s) asociado(s). Reasigne los productos primero.'
+                ], 409);
             }
 
             $categoria->delete();
-            return redirect()->route('admin.categorias.index')->with('success', 'Categoría eliminada con éxito.');
+            return response()->json([
+                'success' => true,
+                'message' => 'Categoría eliminada con éxito.'
+            ]);
         } catch (QueryException $e) {
-            return redirect()->route('admin.categorias.index')->withErrors(['error' => 'No se puede eliminar esta categoría porque tiene registros dependientes.']);
+            return response()->json([
+                'success' => false,
+                'message' => 'No se puede eliminar esta categoría porque tiene registros dependientes.'
+            ], 422);
         } catch (\Exception $e) {
-            return redirect()->route('admin.categorias.index')->withErrors(['error' => 'Ocurrió un error inesperado al eliminar la categoría.']);
+            return response()->json([
+                'success' => false,
+                'message' => 'Ocurrió un error inesperado al eliminar la categoría.'
+            ], 500);
         }
     }
 }
