@@ -33,7 +33,7 @@ class StaticDataSeeder extends Seeder
                 "Alcohol (%)" => 14,
                 "Precio (USD)" => 38.5,
                 "Descuento" => 0,
-                "Imagen" => "https://storage.googleapis.com/tienda_vinos/fotos_no_fondo/Achaval_Ferrer_Quimera-removebg-preview.avif",
+                "Imagen" => "/img/Achaval_Ferrer_Quimera-removebg-preview.avif",
                 "Estado" => "activo"
             ],
             [
@@ -51,7 +51,7 @@ class StaticDataSeeder extends Seeder
                 "Alcohol (%)" => 14.5,
                 "Precio (USD)" => 89.99,
                 "Descuento" => 0,
-                "Imagen" => "https://storage.googleapis.com/tienda_vinos/fotos_no_fondo/Catena_Zapata_Adrianna_Vineyard_Malbec-removebg-preview.avif",
+                "Imagen" => "/img/Catena_Zapata_Adrianna_Vineyard_Malbec-removebg-preview.avif",
                 "Estado" => "activo"
             ],
             [
@@ -69,7 +69,7 @@ class StaticDataSeeder extends Seeder
                 "Alcohol (%)" => 13.5,
                 "Precio (USD)" => 42,
                 "Descuento" => 5,
-                "Imagen" => "https://storage.googleapis.com/tienda_vinos/fotos_no_fondo/Catena_Zapata_White_Bones_Chardonnay-removebg-preview.avif",
+                "Imagen" => "/img/Catena_Zapata_White_Bones_Chardonnay-removebg-preview.avif",
                 "Estado" => "activo"
             ],
             [
@@ -87,7 +87,7 @@ class StaticDataSeeder extends Seeder
                 "Alcohol (%)" => 13,
                 "Precio (USD)" => 520,
                 "Descuento" => 5,
-                "Imagen" => "https://storage.googleapis.com/tienda_vinos/Chateau%20Mouton%20Rothschild.jpg",
+                "Imagen" => "/img/Chateau_Mouton_Rothschild-removebg-preview.avif",
                 "Estado" => "activo"
             ],
             [
@@ -105,7 +105,7 @@ class StaticDataSeeder extends Seeder
                 "Alcohol (%)" => 13.5,
                 "Precio (USD)" => 32.99,
                 "Descuento" => 0,
-                "Imagen" => "https://storage.googleapis.com/tienda_vinos/fotos_no_fondo/Cloudy_Bay_Sauvignon_Blanc-removebg-preview.avif",
+                "Imagen" => "/img/Cloudy_Bay_Sauvignon_Blanc-removebg-preview.avif",
                 "Estado" => "activo"
             ],
             [
@@ -123,7 +123,7 @@ class StaticDataSeeder extends Seeder
                 "Alcohol (%)" => 13.5,
                 "Precio (USD)" => 28.5,
                 "Descuento" => 5,
-                "Imagen" => "https://storage.googleapis.com/tienda_vinos/fotos_no_fondo/Concha_y_Toro_Amelia_Chardonnay-removebg-preview.avif",
+                "Imagen" => "/img/Concha_y_Toro_Amelia_Chardonnay-removebg-preview.avif",
                 "Estado" => "activo"
             ],
             [
@@ -141,7 +141,7 @@ class StaticDataSeeder extends Seeder
                 "Alcohol (%)" => 14,
                 "Precio (USD)" => 75,
                 "Descuento" => 0,
-                "Imagen" => "https://storage.googleapis.com/tienda_vinos/fotos_no_fondo/Concha_y_Toro_Don_Melchor_Cabernet_Sauvignon-removebg-preview.avif",
+                "Imagen" => "/img/Concha_y_Toro_Don_Melchor_Cabernet_Sauvignon-removebg-preview.avif",
                 "Estado" => "activo"
             ],
             [
@@ -159,7 +159,7 @@ class StaticDataSeeder extends Seeder
                 "Alcohol (%)" => 40,
                 "Precio (USD)" => 49.99,
                 "Descuento" => 20,
-                "Imagen" => "https://storage.googleapis.com/tienda_vinos/fotos_no_fondo/Don_Julio_Blanco_Tequila-removebg-preview.avif",
+                "Imagen" => "/img/Don_Julio_Blanco_Tequila-removebg-preview.avif",
                 "Estado" => "activo"
             ],
             [
@@ -177,7 +177,7 @@ class StaticDataSeeder extends Seeder
                 "Alcohol (%)" => 13,
                 "Precio (USD)" => 27,
                 "Descuento" => 0,
-                "Imagen" => "https://storage.googleapis.com/tienda_vinos/fotos_no_fondo/Familia_Zuccardi_Blanc_de_Blancs-removebg-preview.avif",
+                "Imagen" => "/img/Familia_Zuccardi_Blanc_de_Blancs-removebg-preview.avif",
                 "Estado" => "activo"
             ],
             [
@@ -195,7 +195,7 @@ class StaticDataSeeder extends Seeder
                 "Alcohol (%)" => 40,
                 "Precio (USD)" => 29.99,
                 "Descuento" => 0,
-                "Imagen" => "https://storage.googleapis.com/tienda_vinos/fotos_no_fondo/Flor_de_Cana_12_anos-removebg-preview.avif",
+                "Imagen" => "/img/Flor_de_Cana_12_anos-removebg-preview.avif",
                 "Estado" => "activo"
             ],
             [
@@ -213,7 +213,7 @@ class StaticDataSeeder extends Seeder
                 "Alcohol (%)" => 11.5,
                 "Precio (USD)" => 18.99,
                 "Descuento" => 0,
-                "Imagen" => "https://storage.googleapis.com/tienda_vinos/fotos_no_fondo/Freixenet_Cordon_Negro_Brut-removebg-preview.avif",
+                "Imagen" => "/img/Freixenet_Cordon_Negro_Brut-removebg-preview.avif",
                 "Estado" => "activo"
             ],
             [
@@ -231,7 +231,7 @@ class StaticDataSeeder extends Seeder
                 "Alcohol (%)" => 40,
                 "Precio (USD)" => 59.99,
                 "Descuento" => 0,
-                "Imagen" => "https://storage.googleapis.com/tienda_vinos/fotos_no_fondo/Glenfiddich_15_anos_Single_Malt-removebg-preview.avif",
+                "Imagen" => "/img/Glenfiddich_15_anos_Single_Malt-removebg-preview.avif",
                 "Estado" => "activo"
             ],
             [
@@ -249,7 +249,7 @@ class StaticDataSeeder extends Seeder
                 "Alcohol (%)" => 41.4,
                 "Precio (USD)" => 38.5,
                 "Descuento" => 10,
-                "Imagen" => "https://storage.googleapis.com/tienda_vinos/fotos_no_fondo/Hendricks_Gin-removebg-preview.avif",
+                "Imagen" => "/img/Hendricks_Gin-removebg-preview.avif",
                 "Estado" => "activo"
             ],
             [
@@ -267,7 +267,7 @@ class StaticDataSeeder extends Seeder
                 "Alcohol (%)" => 12,
                 "Precio (USD)" => 22,
                 "Descuento" => 0,
-                "Imagen" => "https://storage.googleapis.com/tienda_vinos/fotos_no_fondo/Hugel_Riesling_Classic-removebg-preview.avif",
+                "Imagen" => "/img/Hugel_Riesling_Classic-removebg-preview.avif",
                 "Estado" => "activo"
             ],
             [
@@ -285,7 +285,7 @@ class StaticDataSeeder extends Seeder
                 "Alcohol (%)" => 40,
                 "Precio (USD)" => 28.99,
                 "Descuento" => 10,
-                "Imagen" => "https://storage.googleapis.com/tienda_vinos/fotos_no_fondo/Jack_Daniels_Old_No._7_Tennessee_Whiskey-removebg-preview.avif",
+                "Imagen" => "/img/Jack_Daniels_Old_No._7_Tennessee_Whiskey-removebg-preview.avif",
                 "Estado" => "activo"
             ],
             [
@@ -303,7 +303,7 @@ class StaticDataSeeder extends Seeder
                 "Alcohol (%)" => 40,
                 "Precio (USD)" => 34.99,
                 "Descuento" => 0,
-                "Imagen" => "https://storage.googleapis.com/tienda_vinos/fotos_no_fondo/Johnnie_Walker_Black_Label_12_anos-removebg-preview.avif",
+                "Imagen" => "/img/Johnnie_Walker_Black_Label_12_anos-removebg-preview.avif",
                 "Estado" => "activo"
             ],
             [
@@ -321,7 +321,7 @@ class StaticDataSeeder extends Seeder
                 "Alcohol (%)" => 40,
                 "Precio (USD)" => 89.99,
                 "Descuento" => 5,
-                "Imagen" => "https://storage.googleapis.com/tienda_vinos/fotos_no_fondo/Macallan_12_anos_Sherry_Oak-removebg-preview.avif",
+                "Imagen" => "/img/Macallan_12_anos_Sherry_Oak-removebg-preview.avif",
                 "Estado" => "activo"
             ],
             [
@@ -339,7 +339,7 @@ class StaticDataSeeder extends Seeder
                 "Alcohol (%)" => 13.5,
                 "Precio (USD)" => 19.99,
                 "Descuento" => 0,
-                "Imagen" => "https://storage.googleapis.com/tienda_vinos/fotos_no_fondo/Marques_de_Caceres_Crianza_Rioja-removebg-preview.avif",
+                "Imagen" => "/img/Marques_de_Caceres_Crianza_Rioja-removebg-preview.avif",
                 "Estado" => "activo"
             ],
             [
@@ -357,7 +357,7 @@ class StaticDataSeeder extends Seeder
                 "Alcohol (%)" => 12,
                 "Precio (USD)" => 52,
                 "Descuento" => 0,
-                "Imagen" => "https://storage.googleapis.com/tienda_vinos/fotos_no_fondo/Moet_and_Chandon_Brut_Imperial-removebg-preview.avif",
+                "Imagen" => "/img/Moet_and_Chandon_Brut_Imperial-removebg-preview.avif",
                 "Estado" => "activo"
             ],
             [
@@ -375,7 +375,7 @@ class StaticDataSeeder extends Seeder
                 "Alcohol (%)" => 14,
                 "Precio (USD)" => 24.99,
                 "Descuento" => 0,
-                "Imagen" => "https://storage.googleapis.com/tienda_vinos/fotos_no_fondo/Montes_Alpha_Cabernet_Sauvignon-removebg-preview.avif",
+                "Imagen" => "/img/Montes_Alpha_Cabernet_Sauvignon-removebg-preview.avif",
                 "Estado" => "activo"
             ],
             [
@@ -393,7 +393,7 @@ class StaticDataSeeder extends Seeder
                 "Alcohol (%)" => 40,
                 "Precio (USD)" => 52.99,
                 "Descuento" => 20,
-                "Imagen" => "https://storage.googleapis.com/tienda_vinos/fotos_no_fondo/Patron_Silver_Tequila-removebg-preview.avif",
+                "Imagen" => "/img/Patron_Silver_Tequila-removebg-preview.avif",
                 "Estado" => "activo"
             ],
             [
@@ -411,7 +411,7 @@ class StaticDataSeeder extends Seeder
                 "Alcohol (%)" => 14,
                 "Precio (USD)" => 18.99,
                 "Descuento" => 0,
-                "Imagen" => "https://storage.googleapis.com/tienda_vinos/fotos_no_fondo/Penfolds_Koonunga_Hill_Shiraz-removebg-preview.avif",
+                "Imagen" => "/img/Penfolds_Koonunga_Hill_Shiraz-removebg-preview.avif",
                 "Estado" => "activo"
             ],
             [
@@ -429,7 +429,7 @@ class StaticDataSeeder extends Seeder
                 "Alcohol (%)" => 13.5,
                 "Precio (USD)" => 14.5,
                 "Descuento" => 0,
-                "Imagen" => "https://storage.googleapis.com/tienda_vinos/fotos_no_fondo/Santa_Carolina_Reserva_Carmenere-removebg-preview.avif",
+                "Imagen" => "/img/Santa_Carolina_Reserva_Carmenere-removebg-preview.avif",
                 "Estado" => "activo"
             ],
             [
@@ -447,7 +447,7 @@ class StaticDataSeeder extends Seeder
                 "Alcohol (%)" => 13,
                 "Precio (USD)" => 13.99,
                 "Descuento" => 10,
-                "Imagen" => "https://storage.googleapis.com/tienda_vinos/fotos_no_fondo/Santa_Rita_Reserva_Sauvignon_Blanc-removebg-preview.avif",
+                "Imagen" => "/img/Santa_Rita_Reserva_Sauvignon_Blanc-removebg-preview.avif",
                 "Estado" => "activo"
             ],
             [
@@ -465,7 +465,7 @@ class StaticDataSeeder extends Seeder
                 "Alcohol (%)" => 13.5,
                 "Precio (USD)" => 45,
                 "Descuento" => 0,
-                "Imagen" => "https://storage.googleapis.com/tienda_vinos/fotos_no_fondo/Torres_Mas_La_Plana_Cabernet_Sauvignon-removebg-preview.avif",
+                "Imagen" => "/img/Torres_Mas_La_Plana_Cabernet_Sauvignon-removebg-preview.avif",
                 "Estado" => "activo"
             ],
             [
@@ -483,7 +483,7 @@ class StaticDataSeeder extends Seeder
                 "Alcohol (%)" => 11.5,
                 "Precio (USD)" => 16.5,
                 "Descuento" => 0,
-                "Imagen" => "https://storage.googleapis.com/tienda_vinos/fotos_no_fondo/Torres_Vina_Esmeralda_Moscatel-removebg-preview.avif",
+                "Imagen" => "/img/Torres_Vina_Esmeralda_Moscatel-removebg-preview.avif",
                 "Estado" => "activo"
             ],
             [
@@ -501,7 +501,7 @@ class StaticDataSeeder extends Seeder
                 "Alcohol (%)" => 13,
                 "Precio (USD)" => 15.99,
                 "Descuento" => 0,
-                "Imagen" => "https://storage.googleapis.com/tienda_vinos/fotos_no_fondo/Trivento_Golden_Reserve_Rose-removebg-preview.avif",
+                "Imagen" => "/img/Trivento_Golden_Reserve_Rose-removebg-preview.avif",
                 "Estado" => "activo"
             ],
             [
@@ -519,7 +519,7 @@ class StaticDataSeeder extends Seeder
                 "Alcohol (%)" => 12,
                 "Precio (USD)" => 65,
                 "Descuento" => 0,
-                "Imagen" => "https://storage.googleapis.com/tienda_vinos/fotos_no_fondo/Veuve_Clicquot_Yellow_Label_Brut-removebg-preview.avif",
+                "Imagen" => "/img/Veuve_Clicquot_Yellow_Label_Brut-removebg-preview.avif",
                 "Estado" => "activo"
             ],
             [
@@ -537,7 +537,7 @@ class StaticDataSeeder extends Seeder
                 "Alcohol (%)" => 40,
                 "Precio (USD)" => 54.99,
                 "Descuento" => 20,
-                "Imagen" => "https://storage.googleapis.com/tienda_vinos/fotos_no_fondo/Zacapa_23_Centenario-removebg-preview.avif",
+                "Imagen" => "/img/Zacapa_23_Centenario-removebg-preview.avif",
                 "Estado" => "activo"
             ],
             [
@@ -555,7 +555,7 @@ class StaticDataSeeder extends Seeder
                 "Alcohol (%)" => 13.5,
                 "Precio (USD)" => 32.99,
                 "Descuento" => 0,
-                "Imagen" => "https://storage.googleapis.com/tienda_vinos/fotos_no_fondo/Zuccardi_Valle_de_Uco_Malbec-removebg-preview.avif",
+                "Imagen" => "/img/Zuccardi_Valle_de_Uco_Malbec-removebg-preview.avif",
                 "Estado" => "activo"
             ]
         ];
