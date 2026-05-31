@@ -16,6 +16,6 @@ use Illuminate\Support\Facades\Route;
 // Todas las rutas son manejadas por el frontend (SPA)
 // Esta ruta actúa como un catch-all para la app del frontend
 Route::get('/{any}', function () {
-    return view('app');
+    return view('welcome');
 })->where('any', '.*')->name('spa');
 

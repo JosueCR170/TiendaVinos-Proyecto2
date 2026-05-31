@@ -15,9 +15,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->name('api.')->group(function () {
     
-    Route::apiResource('categorias', \App\Http\Controllers\Admin\CategoriaController::class);
-    Route::apiResource('marcas', \App\Http\Controllers\Admin\MarcaController::class);
-    Route::apiResource('variedades', \App\Http\Controllers\Admin\VariedadController::class);
-    Route::apiResource('productos', \App\Http\Controllers\Admin\ProductoController::class);
+    Route::apiResource('categorias', \App\Http\Controllers\CategoriaController::class);
+    Route::apiResource('marcas', \App\Http\Controllers\MarcaController::class);
+    Route::apiResource('variedades', \App\Http\Controllers\VariedadController::class);
+    Route::apiResource('productos', \App\Http\Controllers\ProductoController::class);
  
 });
