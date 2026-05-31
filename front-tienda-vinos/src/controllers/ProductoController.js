@@ -1,232 +1,114 @@
-import { api } from '@/services/api'
+import BaseController from './BaseController'
 
-class ProductoController {
-  /**
-   * Obtiene todos los productos del catálogo con filtros opcionales
-   * @param {Object} filtros - Objeto con filtros (buscar, categoria, marca, etc)
-   * @param {Number} page - Número de página para paginación
-   * @param {Number} perPage - Cantidad de productos por página
-   * @returns {Promise<Object>}
-   */
+class ProductoController extends BaseController {
+  constructor() {
+    super('/v1/productos')
+  }
+
+  async obtenerProductos(params = {}) {
+    const response = await this.listar(this.normalizeParams(params))
+    const pagination = this.paginator(response)
+
+    return {
+      ...response,
+      productos: pagination.items,
+      pagination,
+    }
+  }
+
   async obtenerCatalogo(filtros = {}, page = 1, perPage = 12) {
-    try {
-      const params = new URLSearchParams({
-        page,
-        per_page: perPage,
-        ...filtros
+    return this.obtenerProductos({
+      ...filtros,
+      page,
+      per_page: perPage,
+    })
+  }
+
+  async obtenerProductoPorId(idProducto) {
+    const response = await this.obtener(idProducto)
+
+    return {
+      ...response,
+      producto: response.data,
+    }
+  }
+
+  crearProducto(data) {
+    return this.crear(data)
+  }
+
+  actualizarProducto(idProducto, data) {
+    return this.actualizar(idProducto, data)
+  }
+
+  eliminarProducto(idProducto) {
+    return this.eliminar(idProducto)
+  }
+
+  buscarProductos(termino, page = 1, perPage = 12) {
+    if (!termino?.trim()) {
+      return Promise.resolve({
+        success: false,
+        message: 'Termino de busqueda es requerido.',
       })
-
-      const response = await api.get(`/api/catalogo?${params.toString()}`)
-      
-      if (!response.success) {
-        throw new Error(response.message || 'Error al obtener catálogo')
-      }
-
-      return {
-        success: true,
-        productos: response.data.productos,
-        pagination: response.data.pagination,
-        filtros: response.data.filtros
-      }
-    } catch (error) {
-      return {
-        success: false,
-        message: error.message || 'Error al obtener catálogo',
-        error
-      }
     }
+
+    return this.obtenerCatalogo({ search: termino }, page, perPage)
   }
 
-  /**
-   * Obtiene los productos destacados de la portada
-   * @returns {Promise<Object>}
-   */
-  async obtenerProductosDestacados() {
-    try {
-      const response = await api.get('/api')
-      
-      if (!response.success) {
-        throw new Error(response.message || 'Error al obtener productos destacados')
-      }
-
-      return {
-        success: true,
-        destacados: response.data.destacados,
-        descuentos: response.data.descuentos
-      }
-    } catch (error) {
-      return {
-        success: false,
-        message: error.message || 'Error al obtener productos',
-        error
-      }
-    }
+  filtrarPorCategoria(idCategoria, page = 1, perPage = 12) {
+    return this.obtenerCatalogo({ id_categoria: idCategoria }, page, perPage)
   }
 
-  /**
-   * Obtiene los detalles de un producto específico
-   * @param {Number} id - ID del producto
-   * @returns {Promise<Object>}
-   */
-  async obtenerProductoPorId(id) {
-    try {
-      if (!id) {
-        throw new Error('ID de producto es requerido')
-      }
-
-      const response = await api.get(`/api/productos/${id}`)
-      
-      if (!response.success) {
-        throw new Error(response.message || 'Producto no encontrado')
-      }
-
-      return {
-        success: true,
-        producto: response.data.producto,
-        relacionados: response.data.relacionados
-      }
-    } catch (error) {
-      return {
-        success: false,
-        message: error.message || 'Error al obtener producto',
-        error
-      }
-    }
+  filtrarPorMarca(idMarca, page = 1, perPage = 12) {
+    return this.obtenerCatalogo({ id_marca: idMarca }, page, perPage)
   }
 
-  /**
-   * Busca productos por término de búsqueda
-   * @param {String} termino - Término de búsqueda
-   * @param {Number} page - Número de página
-   * @returns {Promise<Object>}
-   */
-  async buscarProductos(termino, page = 1) {
-    try {
-      if (!termino || termino.trim().length === 0) {
-        throw new Error('Término de búsqueda es requerido')
-      }
-
-      return this.obtenerCatalogo({ buscar: termino }, page)
-    } catch (error) {
-      return {
-        success: false,
-        message: error.message || 'Error en la búsqueda',
-        error
-      }
-    }
+  filtrarPorPais(pais, page = 1, perPage = 12) {
+    return this.obtenerCatalogo({ pais }, page, perPage)
   }
 
-  /**
-   * Filtra productos por categoría
-   * @param {Number} idCategoria - ID de la categoría
-   * @param {Number} page - Número de página
-   * @returns {Promise<Object>}
-   */
-  async filtrarPorCategoria(idCategoria, page = 1) {
-    try {
-      if (!idCategoria) {
-        throw new Error('ID de categoría es requerido')
-      }
-
-      return this.obtenerCatalogo({ categoria: idCategoria }, page)
-    } catch (error) {
-      return {
-        success: false,
-        message: error.message || 'Error al filtrar por categoría',
-        error
-      }
-    }
+  ordenarProductos(sortBy = 'id_producto', direction = 'asc', page = 1, perPage = 12) {
+    return this.obtenerCatalogo({
+      sort_by: sortBy,
+      direction,
+    }, page, perPage)
   }
 
-  /**
-   * Filtra productos por marca
-   * @param {Number} idMarca - ID de la marca
-   * @param {Number} page - Número de página
-   * @returns {Promise<Object>}
-   */
-  async filtrarPorMarca(idMarca, page = 1) {
-    try {
-      if (!idMarca) {
-        throw new Error('ID de marca es requerido')
-      }
+  normalizeParams(params = {}) {
+    const normalized = { ...params }
 
-      return this.obtenerCatalogo({ marca: idMarca }, page)
-    } catch (error) {
-      return {
-        success: false,
-        message: error.message || 'Error al filtrar por marca',
-        error
-      }
+    if (normalized.buscar && !normalized.search) {
+      normalized.search = normalized.buscar
+      delete normalized.buscar
     }
-  }
 
-  /**
-   * Filtra productos por rango de precio
-   * @param {Number} precioMin - Precio mínimo
-   * @param {Number} precioMax - Precio máximo
-   * @param {Number} page - Número de página
-   * @returns {Promise<Object>}
-   */
-  async filtrarPorPrecio(precioMin, precioMax, page = 1) {
-    try {
-      const filtros = {}
-      
-      if (precioMin !== undefined && precioMin !== null) {
-        filtros.precio_min = precioMin
-      }
-      if (precioMax !== undefined && precioMax !== null) {
-        filtros.precio_max = precioMax
-      }
-
-      return this.obtenerCatalogo(filtros, page)
-    } catch (error) {
-      return {
-        success: false,
-        message: error.message || 'Error al filtrar por precio',
-        error
-      }
+    if (normalized.categoria && !normalized.id_categoria) {
+      normalized.id_categoria = normalized.categoria
+      delete normalized.categoria
     }
-  }
 
-  /**
-   * Obtiene productos en descuento
-   * @param {Number} page - Número de página
-   * @returns {Promise<Object>}
-   */
-  async obtenerProductosEnDescuento(page = 1) {
-    try {
-      return this.obtenerCatalogo({ solo_descuentos: true }, page)
-    } catch (error) {
-      return {
-        success: false,
-        message: error.message || 'Error al obtener productos en descuento',
-        error
-      }
+    if (normalized.marca && !normalized.id_marca) {
+      normalized.id_marca = normalized.marca
+      delete normalized.marca
     }
-  }
 
-  /**
-   * Ordena productos por criterio especificado
-   * @param {String} orden - Criterio de orden (newest, precio_asc, precio_desc, nombre)
-   * @param {Number} page - Número de página
-   * @returns {Promise<Object>}
-   */
-  async ordenarProductos(orden = 'newest', page = 1) {
-    try {
-      const ordenesValidas = ['newest', 'precio_asc', 'precio_desc', 'nombre']
-      
-      if (!ordenesValidas.includes(orden)) {
-        throw new Error('Criterio de orden inválido')
-      }
-
-      return this.obtenerCatalogo({ orden }, page)
-    } catch (error) {
-      return {
-        success: false,
-        message: error.message || 'Error al ordenar productos',
-        error
-      }
+    if (normalized.sort && !normalized.sort_by) {
+      normalized.sort_by = normalized.sort
+      delete normalized.sort
     }
+
+    Object.keys(normalized).forEach((key) => {
+      if (
+        normalized[key] === '' ||
+        normalized[key] === null ||
+        normalized[key] === undefined
+      ) {
+        delete normalized[key]
+      }
+    })
+
+    return normalized
   }
 }
 
