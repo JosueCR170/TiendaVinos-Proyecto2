@@ -6,9 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Producto;
 use App\Models\Categoria;
 use App\Models\Marca;
+use App\Models\Variedad;
 use Illuminate\Http\Request;
 use Illuminate\Database\QueryException;
-use Monarobase\CountryList\CountryList;
 
 class ProductoController extends Controller
 {
@@ -63,17 +63,49 @@ class ProductoController extends Controller
         }
 
         $productos = $query->paginate(10)->withQueryString();
-        
+
         return response()->json([
-            'success' => true,
-            'data' => $productos->items(),
-            'pagination' => [
-                'current_page' => $productos->currentPage(),
-                'per_page' => $productos->perPage(),
-                'total' => $productos->total(),
-                'last_page' => $productos->lastPage()
-            ]
+            'success'      => true,
+            'data'         => $productos->items(),
+            'current_page' => $productos->currentPage(),
+            'last_page'    => $productos->lastPage(),
+            'total'        => $productos->total(),
+            'from'         => $productos->firstItem() ?? 0,
+            'to'           => $productos->lastItem()  ?? 0,
         ]);
+    }
+
+    /**
+     * Devuelve datos auxiliares para los formularios de productos
+     * (categorías, marcas, variedades, países).
+     */
+    public function formData()
+    {
+        $categorias = Categoria::orderBy('nombre')->get(['id_categoria', 'nombre', 'nivel', 'nombre_padre']);
+        $marcas     = Marca::orderBy('nombre')->get(['id_marca', 'nombre']);
+        $variedades = Variedad::orderBy('nombre')->get(['id_variedad', 'nombre']);
+        $paises     = Producto::whereNotNull('pais')
+            ->where('pais', '!=', '')
+            ->distinct()
+            ->orderBy('pais')
+            ->pluck('pais')
+            ->values();
+
+        return response()->json([
+            'categorias' => $categorias,
+            'marcas'     => $marcas,
+            'variedades' => $variedades,
+            'paises'     => $paises,
+        ]);
+    }
+
+    /**
+     * Devuelve un producto específico con sus relaciones para edición.
+     */
+    public function show(Producto $producto)
+    {
+        $producto->load(['categoria', 'marca', 'variedades']);
+        return response()->json(['success' => true, 'data' => $producto]);
     }
 
 
