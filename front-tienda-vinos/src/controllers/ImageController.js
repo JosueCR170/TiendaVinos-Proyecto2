@@ -6,7 +6,7 @@ export default class ImageController {
       const formData = new FormData()
       formData.append('image', file)
 
-      const response = await api.post('images/upload', formData)
+      const response = await api.post('v1/images/upload', formData)
 
       return {
         success: response.data.success ?? true,
@@ -24,7 +24,7 @@ export default class ImageController {
 
   async delete(path) {
     try {
-      const response = await api.delete('images/delete', {
+      const response = await api.delete('v1/images/delete', {
         data: { path }
       })
 

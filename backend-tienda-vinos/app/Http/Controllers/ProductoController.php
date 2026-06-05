@@ -371,7 +371,7 @@ class ProductoController extends Controller
             'alcohol_porcentaje' => 'nullable|numeric|min:0|max:100',
             'contenido_ml' => 'nullable|integer|min:0',
             'anio_cosecha' => 'nullable|integer|min:1900|max:' . (date('Y') + 1),
-            'imagen_url' => 'nullable|url|max:500',
+            'imagen_url' => 'nullable|max:500',
         ], [
             'nombre.required' => 'El nombre del producto es obligatorio.',
             'nombre.max' => 'El nombre no puede exceder 200 caracteres.',

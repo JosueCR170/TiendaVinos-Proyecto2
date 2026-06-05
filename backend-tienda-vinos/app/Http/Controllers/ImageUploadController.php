@@ -4,12 +4,15 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class ImageUploadController extends Controller
 {
     public function upload(Request $request)
     {
         try {
+            Log::info('Image upload started', ['has_file' => $request->hasFile('image')]);
+
             $request->validate([
                 'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048'
             ]);
@@ -17,9 +20,12 @@ class ImageUploadController extends Controller
             $file = $request->file('image');
             $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
 
+            Log::info('Storing file', ['filename' => $filename]);
             $path = $file->storeAs('productos', $filename, 'public');
 
             $url = '/storage/' . $path;
+
+            Log::info('File stored successfully', ['path' => $path, 'url' => $url]);
 
             return response()->json([
                 'success' => true,
@@ -31,6 +37,7 @@ class ImageUploadController extends Controller
             ], 200);
 
         } catch (\Exception $e) {
+            Log::error('Image upload error', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             return response()->json([
                 'success' => false,
                 'message' => 'Error al subir la imagen.',
