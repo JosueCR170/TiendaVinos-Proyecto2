@@ -6,11 +6,7 @@ export default class ImageController {
       const formData = new FormData()
       formData.append('image', file)
 
-      const response = await api.post('images/upload', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      })
+      const response = await api.post('images/upload', formData)
 
       return {
         success: response.data.success ?? true,

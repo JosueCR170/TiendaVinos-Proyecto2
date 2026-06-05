@@ -20,7 +20,7 @@ class Categoria extends Model
 
     public function padre()
     {
-        return $this->belongsTo(Categoria::class, 'nombre_padre');
+        return $this->belongsTo(Categoria::class, 'nombre_padre', 'id_categoria');
     }
 
     public function hijas()
