@@ -18,4 +18,6 @@ Route::prefix('v1/')->name('api.')->group(function () {
     Route::post('images/upload', [\App\Http\Controllers\ImageUploadController::class, 'upload'])->name('images.upload');
     Route::delete('images/delete', [\App\Http\Controllers\ImageUploadController::class, 'delete'])->name('images.delete');
 
+    Route::get('home', [\App\Http\Controllers\DashboardController::class, 'home'])->name('home');
+    Route::get('admin/dashboard', [\App\Http\Controllers\DashboardController::class, 'stats'])->name('admin.dashboard');
 });
