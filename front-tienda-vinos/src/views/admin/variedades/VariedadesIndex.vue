@@ -83,7 +83,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import api from '@/services/api'
+import { VariedadController } from '@/controllers'
 import { useNotificationStore } from '@/stores/notifications'
 
 const notif = useNotificationStore()
@@ -101,8 +101,13 @@ const filteredList = computed(() => {
 async function fetchItems() {
   loading.value = true
   try {
-    const { data } = await api.get('/admin/variedades')
-    items.value = data.data
+    const result = await VariedadController.obtenerVariedades({ per_page: 100 })
+
+    if (!result.success) {
+      throw new Error(result.message)
+    }
+
+    items.value = result.variedades
   } catch (err) {
     error.value = 'Error al cargar las variedades.'
     console.error(err)
@@ -114,11 +119,16 @@ async function fetchItems() {
 async function confirmDelete(item) {
   if (!confirm(`¿Estás seguro de eliminar la variedad "${item.nombre}"?`)) return
   try {
-    await api.delete(`/admin/variedades/${item.id_variedad}`)
+    const result = await VariedadController.eliminarVariedad(item.id_variedad)
+
+    if (!result.success) {
+      throw new Error(result.message)
+    }
+
     notif.show('Variedad eliminada con éxito.', 'success')
     fetchItems()
   } catch (err) {
-    const msg = err.response?.data?.message || 'Error al eliminar la variedad. Puede estar en uso.'
+    const msg = err.message || 'Error al eliminar la variedad. Puede estar en uso.'
     notif.show(msg, 'error')
   }
 }

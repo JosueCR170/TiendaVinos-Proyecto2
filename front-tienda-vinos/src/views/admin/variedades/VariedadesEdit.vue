@@ -30,6 +30,27 @@
             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#2a0002]"
           >
         </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Tipo *</label>
+          <select
+            v-model="form.tipo"
+            required
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#2a0002]"
+          >
+            <option value="">Seleccionar tipo</option>
+            <option value="Tinta">Tinta</option>
+            <option value="Blanca">Blanca</option>
+            <option value="Aromatica">Aromatica</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Descripcion</label>
+          <textarea
+            v-model="form.descripcion"
+            rows="3"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#2a0002]"
+          ></textarea>
+        </div>
       </div>
 
       <div class="mt-8 flex justify-end gap-3 pt-6 border-t border-gray-100">
@@ -51,7 +72,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import api from '@/services/api'
+import { VariedadController } from '@/controllers'
 import { useNotificationStore } from '@/stores/notifications'
 
 const router = useRouter()
@@ -63,12 +84,23 @@ const initialLoading = ref(true)
 const loading = ref(false)
 const error = ref(null)
 
-const form = reactive({ nombre: '' })
+const form = reactive({
+  nombre: '',
+  tipo: '',
+  descripcion: ''
+})
 
 async function fetchData() {
   try {
-    const { data } = await api.get(`/admin/variedades/${id}`)
-    form.nombre = data.data.nombre
+    const result = await VariedadController.obtenerVariedadPorId(id)
+
+    if (!result.success) {
+      throw new Error(result.message)
+    }
+
+    form.nombre = result.variedad.nombre
+    form.tipo = result.variedad.tipo
+    form.descripcion = result.variedad.descripcion
   } catch (err) {
     error.value = 'No se encontró la variedad.'
     console.error(err)
@@ -81,12 +113,17 @@ async function submitForm() {
   loading.value = true
   error.value = null
   try {
-    await api.put(`/admin/variedades/${id}`, form)
+    const result = await VariedadController.actualizarVariedad(id, form)
+
+    if (!result.success) {
+      throw result
+    }
+
     notif.show('Variedad actualizada exitosamente.')
     router.push({ name: 'admin.variedades.index' })
   } catch (err) {
-    if (err.response?.status === 422) {
-      error.value = err.response.data.message || 'Datos inválidos.'
+    if (err.status === 422) {
+      error.value = err.message || 'Datos inválidos.'
     } else {
       error.value = 'Ocurrió un error inesperado.'
     }

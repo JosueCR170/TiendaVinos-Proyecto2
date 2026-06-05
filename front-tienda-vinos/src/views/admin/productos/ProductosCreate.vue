@@ -138,7 +138,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import api from '@/services/api'
+import { ProductoController } from '@/controllers'
 import { useNotificationStore } from '@/stores/notifications'
 
 const router = useRouter()
@@ -171,10 +171,15 @@ const form = reactive({
 
 async function fetchFormData() {
   try {
-    const { data } = await api.get('/admin/productos-form-data')
-    categorias.value = data.categorias
-    marcas.value = data.marcas
-    paises.value = data.paises
+    const result = await ProductoController.obtenerFormData()
+
+    if (!result.success) {
+      throw new Error(result.message)
+    }
+
+    categorias.value = result.categorias
+    marcas.value = result.marcas
+    paises.value = result.paises
   } catch (err) {
     error.value = 'Error al cargar los datos auxiliares (categorías, marcas).'
     console.error(err)
@@ -187,12 +192,17 @@ async function submitForm() {
   loadingSubmit.value = true
   error.value = null
   try {
-    await api.post('/admin/productos', form)
+    const result = await ProductoController.crearProducto(form)
+
+    if (!result.success) {
+      throw result
+    }
+
     notif.show('Producto creado exitosamente.', 'success')
     router.push({ name: 'admin.productos.index' })
   } catch (err) {
-    if (err.response?.status === 422) {
-      error.value = err.response.data.message || 'Error de validación. Revisa los campos.'
+    if (err.status === 422) {
+      error.value = err.message || 'Error de validación. Revisa los campos.'
     } else {
       error.value = 'Ocurrió un error inesperado al guardar el producto.'
     }

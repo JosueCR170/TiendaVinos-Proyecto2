@@ -1,0 +1,6 @@
+export { default as BaseModel } from './BaseModel'
+export { default as Categoria } from './Categoria'
+export { default as Marca } from './Marca'
+export { default as Producto } from './Producto'
+export { default as ProductoVariedad } from './ProductoVariedad'
+export { default as Variedad } from './Variedad'

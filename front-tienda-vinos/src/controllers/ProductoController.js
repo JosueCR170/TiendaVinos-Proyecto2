@@ -1,4 +1,8 @@
 import BaseController from './BaseController'
+import CategoriaController from './CategoriaController'
+import MarcaController from './MarcaController'
+import VariedadController from './VariedadController'
+import { Producto } from '@/models'
 
 class ProductoController extends BaseController {
   constructor() {
@@ -11,7 +15,7 @@ class ProductoController extends BaseController {
 
     return {
       ...response,
-      productos: pagination.items,
+      productos: pagination.items.map((producto) => new Producto(producto)),
       pagination,
     }
   }
@@ -29,7 +33,40 @@ class ProductoController extends BaseController {
 
     return {
       ...response,
-      producto: response.data,
+      producto: new Producto(response.data),
+    }
+  }
+
+  async obtenerFormData() {
+    const [categoriasResponse, marcasResponse, variedadesResponse, productosResponse] = await Promise.all([
+      CategoriaController.obtenerCategorias({ per_page: 100, sort_by: 'nombre' }),
+      MarcaController.obtenerMarcas({ per_page: 100, sort_by: 'nombre' }),
+      VariedadController.obtenerVariedades({ per_page: 100, sort_by: 'nombre' }),
+      this.obtenerProductos({ per_page: 100, sort_by: 'pais' }),
+    ])
+
+    const paises = [...new Set(
+      (productosResponse.productos ?? [])
+        .map((producto) => producto.pais)
+        .filter(Boolean)
+    )].sort((a, b) => a.localeCompare(b))
+
+    return {
+      success: categoriasResponse.success &&
+        marcasResponse.success &&
+        variedadesResponse.success &&
+        productosResponse.success,
+      message: 'Datos del formulario obtenidos correctamente.',
+      categorias: categoriasResponse.categorias ?? [],
+      marcas: marcasResponse.marcas ?? [],
+      variedades: variedadesResponse.variedades ?? [],
+      paises,
+      errors: [
+        categoriasResponse,
+        marcasResponse,
+        variedadesResponse,
+        productosResponse,
+      ].filter((response) => !response.success),
     }
   }
 
@@ -96,6 +133,18 @@ class ProductoController extends BaseController {
     if (normalized.sort && !normalized.sort_by) {
       normalized.sort_by = normalized.sort
       delete normalized.sort
+    }
+
+    if (normalized.orden && !normalized.sort_by) {
+      const sortMap = {
+        newest: { sort_by: 'id_producto', direction: 'desc' },
+        precio_asc: { sort_by: 'precio', direction: 'asc' },
+        precio_desc: { sort_by: 'precio', direction: 'desc' },
+        nombre: { sort_by: 'nombre', direction: 'asc' },
+      }
+
+      Object.assign(normalized, sortMap[normalized.orden] ?? {})
+      delete normalized.orden
     }
 
     Object.keys(normalized).forEach((key) => {

@@ -1,4 +1,5 @@
 import BaseController from './BaseController'
+import { Variedad } from '@/models'
 
 class VariedadController extends BaseController {
   constructor() {
@@ -11,7 +12,7 @@ class VariedadController extends BaseController {
 
     return {
       ...response,
-      variedades: pagination.items,
+      variedades: pagination.items.map((variedad) => new Variedad(variedad)),
       pagination,
     }
   }
@@ -21,7 +22,7 @@ class VariedadController extends BaseController {
 
     return {
       ...response,
-      variedad: response.data,
+      variedad: new Variedad(response.data),
     }
   }
 

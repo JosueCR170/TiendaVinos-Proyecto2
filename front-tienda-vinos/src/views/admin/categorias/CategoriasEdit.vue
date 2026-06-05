@@ -92,7 +92,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import api from '@/services/api'
+import { CategoriaController } from '@/controllers'
 import { useNotificationStore } from '@/stores/notifications'
 
 const router = useRouter()
@@ -121,11 +121,16 @@ async function fetchData() {
   initialLoading.value = true
   try {
     // 1. Cargar todas las categorías para el select
-    const { data: catData } = await api.get('/admin/categorias')
-    todasCategorias.value = catData.data
+    const result = await CategoriaController.obtenerCategorias({ per_page: 100 })
+
+    if (!result.success) {
+      throw new Error(result.message)
+    }
+
+    todasCategorias.value = result.categorias
     
     // 2. Encontrar la categoría actual para editar
-    const categoriaData = catData.data.find(c => c.id_categoria == id)
+    const categoriaData = result.categorias.find(c => c.id_categoria == id)
     
     if (categoriaData) {
       form.nombre = categoriaData.nombre
@@ -151,12 +156,17 @@ async function submitForm() {
     const payload = { ...form }
     if (payload.nivel === 1) payload.nombre_padre = null
 
-    await api.put(`/admin/categorias/${id}`, payload)
+    const result = await CategoriaController.actualizarCategoria(id, payload)
+
+    if (!result.success) {
+      throw result
+    }
+
     notif.show('Categoría actualizada exitosamente.')
     router.push({ name: 'admin.categorias.index' })
   } catch (err) {
-    if (err.response?.status === 422) {
-      error.value = err.response.data.message || 'Datos inválidos. Verifica el formulario.'
+    if (err.status === 422) {
+      error.value = err.message || 'Datos inválidos. Verifica el formulario.'
     } else {
       error.value = 'Ocurrió un error inesperado al actualizar la categoría.'
     }

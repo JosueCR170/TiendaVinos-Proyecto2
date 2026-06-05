@@ -110,7 +110,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import api from '@/services/api'
+import { CategoriaController } from '@/controllers'
 import { useNotificationStore } from '@/stores/notifications'
 
 const notif = useNotificationStore()
@@ -131,8 +131,13 @@ const filteredCategorias = computed(() => {
 async function fetchCategorias() {
   loading.value = true
   try {
-    const { data } = await api.get('/admin/categorias')
-    categorias.value = data.data
+    const result = await CategoriaController.obtenerCategorias({ per_page: 100 })
+
+    if (!result.success) {
+      throw new Error(result.message)
+    }
+
+    categorias.value = result.categorias
   } catch (err) {
     error.value = 'Error al cargar las categorías.'
     console.error(err)
@@ -145,11 +150,16 @@ async function confirmDelete(cat) {
   if (!confirm(`¿Estás seguro de eliminar la categoría "${cat.nombre}"?\nEsta acción no se puede deshacer.`)) return
   
   try {
-    await api.delete(`/admin/categorias/${cat.id_categoria}`)
+    const result = await CategoriaController.eliminarCategoria(cat.id_categoria)
+
+    if (!result.success) {
+      throw new Error(result.message)
+    }
+
     notif.show('Categoría eliminada con éxito.', 'success')
     fetchCategorias()
   } catch (err) {
-    const msg = err.response?.data?.message || 'Error al eliminar la categoría.'
+    const msg = err.message || 'Error al eliminar la categoría.'
     notif.show(msg, 'error')
   }
 }

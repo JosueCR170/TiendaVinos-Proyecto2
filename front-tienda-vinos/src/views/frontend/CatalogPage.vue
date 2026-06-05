@@ -266,7 +266,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import api from '@/services/api'
+import { ProductoController } from '@/controllers'
 import { useCartStore }         from '@/stores/cart'
 import { useNotificationStore } from '@/stores/notifications'
 
@@ -310,11 +310,17 @@ const visiblePages = computed(() => {
 })
 
 async function fetchMeta() {
-  const { data } = await api.get('/catalogo/meta')
-  meta.categorias = data.categorias ?? []
-  meta.marcas     = data.marcas     ?? []
-  meta.variedades = data.variedades ?? []
-  meta.paises     = data.paises     ?? []
+  const result = await ProductoController.obtenerFormData()
+
+  if (!result.success) {
+    console.warn('No se pudieron cargar los filtros del catalogo.', result.errors)
+    return
+  }
+
+  meta.categorias = result.categorias ?? []
+  meta.marcas     = result.marcas ?? []
+  meta.variedades = result.variedades ?? []
+  meta.paises     = result.paises ?? []
 }
 
 async function fetchProductos() {
@@ -330,13 +336,18 @@ async function fetchProductos() {
       orden:           filters.orden          || undefined,
       page:            filters.page,
     }
-    const { data } = await api.get('/catalogo', { params })
-    productos.value = data.data ?? []
-    pagination.current_page = data.current_page
-    pagination.last_page    = data.last_page
-    pagination.total        = data.total
-    pagination.from         = data.from
-    pagination.to           = data.to
+    const result = await ProductoController.obtenerProductos(params)
+
+    if (!result.success) {
+      throw new Error(result.message)
+    }
+
+    productos.value = result.productos ?? []
+    pagination.current_page = result.pagination.currentPage
+    pagination.last_page    = result.pagination.lastPage
+    pagination.total        = result.pagination.total
+    pagination.from         = result.pagination.from
+    pagination.to           = result.pagination.to
   } catch (e) {
     console.error('Error cargando catálogo', e)
   } finally {

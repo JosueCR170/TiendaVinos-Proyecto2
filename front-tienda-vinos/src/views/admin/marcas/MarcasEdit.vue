@@ -30,6 +30,23 @@
             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#2a0002]"
           >
         </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Pais *</label>
+          <input
+            v-model="form.pais"
+            type="text"
+            required
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#2a0002]"
+          >
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Descripcion</label>
+          <textarea
+            v-model="form.descripcion"
+            rows="3"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#2a0002]"
+          ></textarea>
+        </div>
       </div>
 
       <div class="mt-8 flex justify-end gap-3 pt-6 border-t border-gray-100">
@@ -51,7 +68,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import api from '@/services/api'
+import { MarcaController } from '@/controllers'
 import { useNotificationStore } from '@/stores/notifications'
 
 const router = useRouter()
@@ -63,12 +80,23 @@ const initialLoading = ref(true)
 const loading = ref(false)
 const error = ref(null)
 
-const form = reactive({ nombre: '' })
+const form = reactive({
+  nombre: '',
+  pais: '',
+  descripcion: ''
+})
 
 async function fetchData() {
   try {
-    const { data } = await api.get(`/admin/marcas/${id}`)
-    form.nombre = data.data.nombre
+    const result = await MarcaController.obtenerMarcaPorId(id)
+
+    if (!result.success) {
+      throw new Error(result.message)
+    }
+
+    form.nombre = result.marca.nombre
+    form.pais = result.marca.pais
+    form.descripcion = result.marca.descripcion
   } catch (err) {
     error.value = 'No se encontró la marca.'
     console.error(err)
@@ -81,12 +109,17 @@ async function submitForm() {
   loading.value = true
   error.value = null
   try {
-    await api.put(`/admin/marcas/${id}`, form)
+    const result = await MarcaController.actualizarMarca(id, form)
+
+    if (!result.success) {
+      throw result
+    }
+
     notif.show('Marca actualizada exitosamente.')
     router.push({ name: 'admin.marcas.index' })
   } catch (err) {
-    if (err.response?.status === 422) {
-      error.value = err.response.data.message || 'Datos inválidos.'
+    if (err.status === 422) {
+      error.value = err.message || 'Datos inválidos.'
     } else {
       error.value = 'Ocurrió un error inesperado.'
     }

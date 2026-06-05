@@ -1,4 +1,5 @@
 import BaseController from './BaseController'
+import { Marca } from '@/models'
 
 class MarcaController extends BaseController {
   constructor() {
@@ -11,7 +12,7 @@ class MarcaController extends BaseController {
 
     return {
       ...response,
-      marcas: pagination.items,
+      marcas: pagination.items.map((marca) => new Marca(marca)),
       pagination,
     }
   }
@@ -21,7 +22,7 @@ class MarcaController extends BaseController {
 
     return {
       ...response,
-      marca: response.data,
+      marca: new Marca(response.data),
     }
   }
 

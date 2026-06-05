@@ -90,7 +90,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import api from '@/services/api'
+import { CategoriaController } from '@/controllers'
 import { useNotificationStore } from '@/stores/notifications'
 
 const router = useRouter()
@@ -114,8 +114,13 @@ const categoriasPrincipales = computed(() => {
 
 async function fetchCategorias() {
   try {
-    const { data } = await api.get('/admin/categorias')
-    todasCategorias.value = data.data
+    const result = await CategoriaController.obtenerCategorias({ per_page: 100 })
+
+    if (!result.success) {
+      throw new Error(result.message)
+    }
+
+    todasCategorias.value = result.categorias
   } catch (err) {
     console.error('No se pudieron cargar las categorías para el select.', err)
   }
@@ -129,12 +134,17 @@ async function submitForm() {
     const payload = { ...form }
     if (payload.nivel === 1) payload.nombre_padre = null
 
-    await api.post('/admin/categorias', payload)
+    const result = await CategoriaController.crearCategoria(payload)
+
+    if (!result.success) {
+      throw result
+    }
+
     notif.show('Categoría creada exitosamente.')
     router.push({ name: 'admin.categorias.index' })
   } catch (err) {
-    if (err.response?.status === 422) {
-      error.value = err.response.data.message || 'Datos inválidos. Verifica el formulario.'
+    if (err.status === 422) {
+      error.value = err.message || 'Datos inválidos. Verifica el formulario.'
     } else {
       error.value = 'Ocurrió un error inesperado al guardar la categoría.'
     }

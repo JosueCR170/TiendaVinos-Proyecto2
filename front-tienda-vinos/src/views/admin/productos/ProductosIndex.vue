@@ -326,7 +326,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import api from '@/services/api'
+import { ProductoController } from '@/controllers'
 import { useNotificationStore } from '@/stores/notifications'
 
 const route  = useRoute()
@@ -426,11 +426,15 @@ function syncFromQuery() {
 
 async function fetchFormData() {
   try {
-    // GET /api/v1/admin/productos-form-data devuelve categorias, marcas y paises
-    const { data } = await api.get('/admin/productos-form-data')
-    categorias.value = data.categorias
-    marcas.value     = data.marcas
-    paises.value     = data.paises
+    const result = await ProductoController.obtenerFormData()
+
+    if (!result.success) {
+      throw new Error(result.message)
+    }
+
+    categorias.value = result.categorias
+    marcas.value     = result.marcas
+    paises.value     = result.paises
   } catch {
     // No bloqueante: la tabla sigue siendo útil sin los filtros de selects
     console.warn('No se pudieron cargar los datos de formulario.')
@@ -442,24 +446,26 @@ async function fetchProductos() {
   error.value   = null
 
   try {
-    const { data } = await api.get('/admin/productos', {
-      params: {
-        page:      pagination.currentPage,
-        search:    filters.search    || undefined,
-        categoria: filters.categoria || undefined,
-        marca:     filters.marca     || undefined,
-        pais:      filters.pais      || undefined,
-        sort:      sort.field,
-        direction: sort.direction,
-      },
+    const result = await ProductoController.obtenerProductos({
+      page:      pagination.currentPage,
+      search:    filters.search    || undefined,
+      categoria: filters.categoria || undefined,
+      marca:     filters.marca     || undefined,
+      pais:      filters.pais      || undefined,
+      sort:      sort.field,
+      direction: sort.direction,
     })
 
-    productos.value        = data.data
-    pagination.currentPage = data.current_page
-    pagination.lastPage    = data.last_page
-    pagination.total       = data.total
-    pagination.from        = data.from
-    pagination.to          = data.to
+    if (!result.success) {
+      throw new Error(result.message)
+    }
+
+    productos.value        = result.productos
+    pagination.currentPage = result.pagination.currentPage
+    pagination.lastPage    = result.pagination.lastPage
+    pagination.total       = result.pagination.total
+    pagination.from        = result.pagination.from
+    pagination.to          = result.pagination.to
   } catch (e) {
     error.value = 'Error al cargar los productos. Intente nuevamente.'
     console.error(e)
@@ -515,7 +521,12 @@ async function confirmDelete() {
   deleteModal.loading = true
 
   try {
-    await api.delete(`/admin/productos/${deleteModal.producto.id_producto}`)
+    const result = await ProductoController.eliminarProducto(deleteModal.producto.id_producto)
+
+    if (!result.success) {
+      throw new Error(result.message)
+    }
+
     notif.show('Producto eliminado de la bodega', 'success')
     closeDeleteModal()
     // Si la página actual queda vacía al borrar el último ítem, retroceder una página
@@ -523,7 +534,7 @@ async function confirmDelete() {
     await fetchProductos()
     if (isLastItemOnPage) goToPage(pagination.currentPage - 1)
   } catch (e) {
-    const msg = e.response?.data?.message ?? 'Error al eliminar el producto.'
+    const msg = e.message ?? 'Error al eliminar el producto.'
     notif.show(msg, 'error')
   } finally {
     deleteModal.loading = false

@@ -27,6 +27,24 @@
             placeholder="Ej: Concha y Toro, Rutini..."
           >
         </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Pais *</label>
+          <input
+            v-model="form.pais"
+            type="text"
+            required
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#2a0002]"
+            placeholder="Ej: Chile, Argentina..."
+          >
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Descripcion</label>
+          <textarea
+            v-model="form.descripcion"
+            rows="3"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#2a0002]"
+          ></textarea>
+        </div>
       </div>
 
       <div class="mt-8 flex justify-end gap-3 pt-6 border-t border-gray-100">
@@ -48,7 +66,7 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
-import api from '@/services/api'
+import { MarcaController } from '@/controllers'
 import { useNotificationStore } from '@/stores/notifications'
 
 const router = useRouter()
@@ -57,18 +75,27 @@ const notif = useNotificationStore()
 const loading = ref(false)
 const error = ref(null)
 
-const form = reactive({ nombre: '' })
+const form = reactive({
+  nombre: '',
+  pais: '',
+  descripcion: ''
+})
 
 async function submitForm() {
   loading.value = true
   error.value = null
   try {
-    await api.post('/admin/marcas', form)
+    const result = await MarcaController.crearMarca(form)
+
+    if (!result.success) {
+      throw result
+    }
+
     notif.show('Marca creada exitosamente.')
     router.push({ name: 'admin.marcas.index' })
   } catch (err) {
-    if (err.response?.status === 422) {
-      error.value = err.response.data.message || 'Datos inválidos.'
+    if (err.status === 422) {
+      error.value = err.message || 'Datos inválidos.'
     } else {
       error.value = 'Ocurrió un error inesperado al guardar.'
     }

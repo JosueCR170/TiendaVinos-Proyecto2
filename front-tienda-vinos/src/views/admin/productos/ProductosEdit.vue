@@ -138,7 +138,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import api from '@/services/api'
+import { ProductoController } from '@/controllers'
 import { useNotificationStore } from '@/stores/notifications'
 
 const router = useRouter()
@@ -175,15 +175,19 @@ const form = reactive({
 async function fetchData() {
   try {
     const [formData, productData] = await Promise.all([
-      api.get('/admin/productos-form-data'),
-      api.get(`/admin/productos/${id}`)
+      ProductoController.obtenerFormData(),
+      ProductoController.obtenerProductoPorId(id)
     ])
-    
-    categorias.value = formData.data.categorias
-    marcas.value = formData.data.marcas
-    paises.value = formData.data.paises
 
-    const p = productData.data.data
+    if (!formData.success || !productData.success) {
+      throw new Error(formData.message || productData.message)
+    }
+    
+    categorias.value = formData.categorias
+    marcas.value = formData.marcas
+    paises.value = formData.paises
+
+    const p = productData.producto
     form.nombre = p.nombre
     form.id_categoria = p.id_categoria
     form.id_marca = p.id_marca
@@ -210,12 +214,17 @@ async function submitForm() {
   loadingSubmit.value = true
   error.value = null
   try {
-    await api.put(`/admin/productos/${id}`, form)
+    const result = await ProductoController.actualizarProducto(id, form)
+
+    if (!result.success) {
+      throw result
+    }
+
     notif.show('Producto actualizado exitosamente.', 'success')
     router.push({ name: 'admin.productos.index' })
   } catch (err) {
-    if (err.response?.status === 422) {
-      error.value = err.response.data.message || 'Error de validación. Revisa los campos.'
+    if (err.status === 422) {
+      error.value = err.message || 'Error de validación. Revisa los campos.'
     } else {
       error.value = 'Ocurrió un error inesperado al actualizar el producto.'
     }

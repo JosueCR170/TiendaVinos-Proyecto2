@@ -207,6 +207,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { ProductoController } from '@/controllers'
 
 const route = useRoute()
 const producto = ref({})
@@ -234,10 +235,24 @@ const agregarAlCarrito = async (id) => {
 onMounted(async () => {
   try {
     const id = route.params.id
-    const response = await fetch(`/api/productos/${id}`)
-    const data = await response.json()
-    producto.value = data.producto || {}
-    relacionados.value = data.relacionados || []
+    const result = await ProductoController.obtenerProductoPorId(id)
+
+    if (!result.success) {
+      throw new Error(result.message)
+    }
+
+    producto.value = result.producto
+
+    if (result.producto.id_categoria) {
+      const relatedResult = await ProductoController.obtenerProductos({
+        id_categoria: result.producto.id_categoria,
+        per_page: 4,
+      })
+
+      relacionados.value = (relatedResult.productos ?? [])
+        .filter((item) => item.id_producto !== result.producto.id_producto)
+        .slice(0, 3)
+    }
   } catch (error) {
     console.error('Error loading product:', error)
   }

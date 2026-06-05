@@ -1,4 +1,5 @@
 import BaseController from './BaseController'
+import { Categoria } from '@/models'
 
 class CategoriaController extends BaseController {
   constructor() {
@@ -11,7 +12,7 @@ class CategoriaController extends BaseController {
 
     return {
       ...response,
-      categorias: pagination.items,
+      categorias: pagination.items.map((categoria) => new Categoria(categoria)),
       pagination,
     }
   }
@@ -21,7 +22,7 @@ class CategoriaController extends BaseController {
 
     return {
       ...response,
-      categoria: response.data,
+      categoria: new Categoria(response.data),
     }
   }
 
