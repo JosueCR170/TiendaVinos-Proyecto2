@@ -637,6 +637,12 @@ class StaticDataSeeder extends Seeder
             );
 
             // 3. Producto
+            $appUrl = rtrim(config('app.url'), '/');
+            $imagenUrl = $row['Imagen'];
+            if (!filter_var($imagenUrl, FILTER_VALIDATE_URL)) {
+                $imagenUrl = $appUrl . $imagenUrl;
+            }
+
             $producto = Producto::create([
                 'nombre' => $row['Nombre'],
                 'descripcion' => $row['Descripcion'],
@@ -649,7 +655,7 @@ class StaticDataSeeder extends Seeder
                 'contenido_ml' => $row['Contenido (ml)'],
                 'anio_cosecha' => $row['Anio Cosecha'],
                 'alcohol_porcentaje' => $row['Alcohol (%)'],
-                'imagen_url' => $row['Imagen'],
+                'imagen_url' => $imagenUrl,
                 'descuento' => $row['Descuento'] ?? 0,
                 'estado' => ($row['Estado'] === 'activo' || $row['Estado'] === 1)
             ]);

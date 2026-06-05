@@ -105,9 +105,25 @@
         <h2 class="text-lg font-serif font-bold text-[#2a0002] border-b pb-2 mb-4">Multimedia y Estado</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="col-span-2">
-            <label class="block text-sm font-medium text-gray-700 mb-1">URL de Imagen</label>
-            <input v-model="form.imagen_url" type="url" class="input-field" placeholder="https://...">
-            <div v-if="form.imagen_url" class="mt-2">
+            <label class="block text-sm font-medium text-gray-700 mb-3">Imagen del Producto</label>
+            <div class="flex gap-4">
+              <div class="flex-1">
+                <div class="border-2 border-dashed border-gray-300 rounded-md p-6 text-center hover:border-gray-400 transition-colors cursor-pointer" @click="$refs.fileInput.click()">
+                  <input ref="fileInput" type="file" accept="image/*" class="hidden" @change="handleImageUpload">
+                  <span class="material-symbols-outlined block text-3xl text-gray-400 mb-2 mx-auto">image</span>
+                  <p class="text-sm text-gray-600">Haz clic para subir una imagen</p>
+                  <p class="text-xs text-gray-500 mt-1">PNG, JPG, GIF (máx. 2MB)</p>
+                  <div v-if="uploadingImage" class="mt-2">
+                    <span class="material-symbols-outlined animate-spin text-lg text-[#735c00]">progress_activity</span>
+                  </div>
+                </div>
+              </div>
+              <div class="flex-1">
+                <label class="block text-sm font-medium text-gray-700 mb-1">O USA UNA URL</label>
+                <input v-model="form.imagen_url" type="url" class="input-field" placeholder="https://...">
+              </div>
+            </div>
+            <div v-if="form.imagen_url" class="mt-4">
               <img :src="form.imagen_url" alt="Vista previa" class="h-32 object-contain rounded border border-gray-200">
             </div>
           </div>
@@ -138,7 +154,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { ProductoController } from '@/controllers'
+import { ProductoController, ImageController } from '@/controllers'
 import { useNotificationStore } from '@/stores/notifications'
 
 const router = useRouter()
@@ -149,11 +165,14 @@ const id = route.params.id
 
 const loadingForm = ref(true)
 const loadingSubmit = ref(false)
+const uploadingImage = ref(false)
 const error = ref(null)
 
 const categorias = ref([])
 const marcas = ref([])
 const paises = ref([])
+
+const fileInput = ref(null)
 
 const form = reactive({
   nombre: '',
@@ -182,7 +201,7 @@ async function fetchData() {
     if (!formData.success || !productData.success) {
       throw new Error(formData.message || productData.message)
     }
-    
+
     categorias.value = formData.categorias
     marcas.value = formData.marcas
     paises.value = formData.paises
@@ -207,6 +226,28 @@ async function fetchData() {
     console.error(err)
   } finally {
     loadingForm.value = false
+  }
+}
+
+async function handleImageUpload(event) {
+  const file = event.target.files?.[0]
+  if (!file) return
+
+  uploadingImage.value = true
+  try {
+    const imageCtrl = new ImageController()
+    const result = await imageCtrl.upload(file)
+
+    if (!result.success) {
+      throw new Error(result.message)
+    }
+
+    form.imagen_url = result.data.imagen_url
+    notif.show('Imagen subida correctamente.', 'success')
+  } catch (err) {
+    error.value = err.message || 'Error al subir la imagen.'
+  } finally {
+    uploadingImage.value = false
   }
 }
 
