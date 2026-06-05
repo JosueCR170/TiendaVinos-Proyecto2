@@ -1,67 +1,81 @@
 <template>
-  <div class="form-view max-w-2xl mx-auto">
-    <header class="mb-8 flex items-center justify-between">
-      <div>
-        <h1 class="text-3xl font-bold font-serif text-[#2a0002]">Nueva Variedad</h1>
-        <p class="text-gray-600 mt-2">Agrega una nueva cepa al catálogo.</p>
-      </div>
-      <router-link :to="{ name: 'admin.variedades.index' }" class="text-sm font-medium text-gray-500 hover:text-gray-900 flex items-center gap-1">
-        <span class="material-symbols-outlined text-sm">arrow_back</span>
-        Volver
-      </router-link>
-    </header>
+  <div class="create-view-wrapper">
+    <form @submit.prevent="submitForm">
 
-    <form @submit.prevent="submitForm" class="bg-white p-8 rounded-lg shadow-sm border border-gray-100">
-      <div v-if="error" class="mb-6 bg-red-50 text-red-700 p-4 rounded-md text-sm border border-red-200">
-        {{ error }}
-      </div>
+      <header class="header-section">
+        <div class="header-text">
+          <h1>Nueva Variedad de Uva</h1>
+          <p>Define una nueva cepa para enriquecer el perfil sensorial de los vinos catalogados.</p>
+        </div>
+        <div class="header-actions">
+          <router-link :to="{ name: 'admin.variedades.index' }" class="btn-discard">Descartar</router-link>
+          <button type="submit" class="btn-save" :disabled="loading">
+            {{ loading ? 'Guardando...' : 'Guardar Variedad' }}
+          </button>
+        </div>
+      </header>
 
-      <div class="space-y-6">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Nombre de la Variedad *</label>
-          <input 
-            v-model="form.nombre" 
-            type="text" 
-            required 
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#2a0002]"
-            placeholder="Ej: Malbec, Cabernet Sauvignon..."
-          >
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Tipo *</label>
-          <select
-            v-model="form.tipo"
-            required
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#2a0002]"
-          >
-            <option value="">Seleccionar tipo</option>
-            <option value="Tinta">Tinta</option>
-            <option value="Blanca">Blanca</option>
-            <option value="Aromatica">Aromatica</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Descripcion</label>
-          <textarea
-            v-model="form.descripcion"
-            rows="3"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#2a0002]"
-          ></textarea>
+      <div v-if="error" class="alert-premium error" style="margin-bottom:32px;">
+        <span class="material-symbols-outlined alert-icon">error</span>
+        <div class="alert-content">
+          <span class="alert-title">Error</span>
+          <p class="alert-message">{{ error }}</p>
         </div>
       </div>
 
-      <div class="mt-8 flex justify-end gap-3 pt-6 border-t border-gray-100">
-        <router-link :to="{ name: 'admin.variedades.index' }" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-50 transition-colors">
-          Cancelar
-        </router-link>
-        <button 
-          type="submit" 
-          :disabled="loading"
-          class="px-4 py-2 bg-[#2a0002] text-white rounded-md text-sm font-medium hover:bg-[#3d0003] transition-colors disabled:opacity-50"
-        >
-          {{ loading ? 'Guardando...' : 'Guardar Variedad' }}
-        </button>
+      <div class="main-grid">
+        <div class="form-column">
+
+          <!-- Section 01 -->
+          <section>
+            <div class="section-header">
+              <span class="section-num">01</span>
+              <h2>Perfil de la Variedad</h2>
+            </div>
+            <div class="input-grid">
+              <div class="form-group">
+                <label for="nombre">Nombre de la Variedad</label>
+                <input v-model="form.nombre" type="text" id="nombre" placeholder="ej. Cabernet Sauvignon" required>
+              </div>
+              <div class="form-group">
+                <label for="tipo">Tipo de Uva</label>
+                <select v-model="form.tipo" id="tipo" class="premium-select" required>
+                  <option value="" disabled>Seleccionar...</option>
+                  <option value="Tinta">Tinta</option>
+                  <option value="Blanca">Blanca</option>
+                  <option value="Aromatica">Aromatica</option>
+                </select>
+              </div>
+            </div>
+          </section>
+
+          <!-- Section 02 -->
+          <section>
+            <div class="section-header">
+              <span class="section-num">02</span>
+              <h2>Notas de Cepa</h2>
+            </div>
+            <div class="note-area">
+              <textarea v-model="form.descripcion" id="descripcion" rows="6" placeholder="Describe las características típicas, aromas y sabores de esta variedad..."></textarea>
+              <div class="note-badge">Voz de Sommelier</div>
+            </div>
+          </section>
+
+        </div>
+
+        <div class="visual-column">
+          <div class="curator-tip">
+            <div class="tip-header">
+              <span class="material-symbols-outlined" style="font-size:14px;">auto_awesome</span>
+              Identidad del Terroir
+            </div>
+            <p class="tip-text">
+              "Cada variedad aporta una estructura única al vino. Describir su perfil aromático ayuda al coleccionista a predecir la experiencia de cata."
+            </p>
+          </div>
+        </div>
       </div>
+
     </form>
   </div>
 </template>
@@ -89,19 +103,13 @@ async function submitForm() {
   error.value = null
   try {
     const result = await VariedadController.crearVariedad(form)
-
-    if (!result.success) {
-      throw result
-    }
-
+    if (!result.success) throw result
     notif.show('Variedad creada exitosamente.')
     router.push({ name: 'admin.variedades.index' })
   } catch (err) {
-    if (err.status === 422) {
-      error.value = err.message || 'Datos inválidos.'
-    } else {
-      error.value = 'Ocurrió un error inesperado al guardar.'
-    }
+    error.value = err.status === 422
+      ? err.message || 'Datos inválidos.'
+      : 'Ocurrió un error inesperado al guardar.'
   } finally {
     loading.value = false
   }

@@ -25,10 +25,7 @@
         <span class="material-symbols-outlined">settings</span>
       </RouterLink>
 
-      <!-- Cuenta -->
-      <button class="icon-btn" title="Mi cuenta">
-        <span class="material-symbols-outlined">person</span>
-      </button>
+
     </div>
   </nav>
 

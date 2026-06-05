@@ -1,151 +1,198 @@
 <template>
-  <div class="form-view max-w-4xl mx-auto pb-12">
-    <header class="mb-8 flex items-center justify-between">
-      <div>
-        <h1 class="text-3xl font-bold font-serif text-[#2a0002]">Nuevo Producto</h1>
-        <p class="text-gray-600 mt-2">Registra un nuevo vino o licor en la bodega.</p>
-      </div>
-      <router-link :to="{ name: 'admin.productos.index' }" class="text-sm font-medium text-gray-500 hover:text-gray-900 flex items-center gap-1">
-        <span class="material-symbols-outlined text-sm">arrow_back</span>
-        Volver
-      </router-link>
-    </header>
-
-    <div v-if="loadingForm" class="flex justify-center p-12">
-      <span class="material-symbols-outlined animate-spin text-3xl text-[#735c00]">progress_activity</span>
+  <div class="create-view-wrapper">
+    <div v-if="loadingForm" class="flex justify-center" style="padding: 80px 0;">
+      <span class="material-symbols-outlined" style="font-size:48px;color:var(--tertiary);animation:spin 1s linear infinite;">progress_activity</span>
     </div>
 
-    <form v-else @submit.prevent="submitForm" class="bg-white p-8 rounded-lg shadow-sm border border-gray-100 space-y-8">
-      <div v-if="error" class="bg-red-50 text-red-700 p-4 rounded-md text-sm border border-red-200">
-        {{ error }}
+    <form v-else @submit.prevent="submitForm">
+
+      <header class="header-section">
+        <div class="header-text">
+          <h1>Catalogar Nuevo Vino</h1>
+          <p>Define la narrativa, especificaciones técnicas y el legado de una nueva adición a la cava digital.</p>
+        </div>
+        <div class="header-actions">
+          <router-link :to="{ name: 'admin.productos.index' }" class="btn-discard">Descartar</router-link>
+          <button type="submit" class="btn-save" :disabled="loadingSubmit">
+            {{ loadingSubmit ? 'Guardando...' : 'Guardar Colección' }}
+          </button>
+        </div>
+      </header>
+
+      <div v-if="error" class="alert-premium error" style="margin-bottom:32px;">
+        <span class="material-symbols-outlined alert-icon">error</span>
+        <div class="alert-content">
+          <span class="alert-title">Error</span>
+          <p class="alert-message">{{ error }}</p>
+        </div>
       </div>
 
-      <!-- Sección 1: Información Principal -->
-      <section>
-        <h2 class="text-lg font-serif font-bold text-[#2a0002] border-b pb-2 mb-4">Información Principal</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="col-span-2">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Nombre del Producto *</label>
-            <input v-model="form.nombre" type="text" required class="input-field" placeholder="Ej: Casillero del Diablo Reserva">
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Categoría *</label>
-            <select v-model="form.id_categoria" required class="input-field">
-              <option value="" disabled>Seleccionar...</option>
-              <option v-for="cat in categorias" :key="cat.id_categoria" :value="cat.id_categoria">
-                {{ cat.nombre }} {{ cat.nombre_padre ? `(de ${cat.nombre_padre})` : '' }}
-              </option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Marca / Bodega *</label>
-            <select v-model="form.id_marca" required class="input-field">
-              <option value="" disabled>Seleccionar...</option>
-              <option v-for="marca in marcas" :key="marca.id_marca" :value="marca.id_marca">{{ marca.nombre }}</option>
-            </select>
-          </div>
-          <div class="col-span-2">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
-            <textarea v-model="form.descripcion" rows="3" class="input-field resize-y"></textarea>
-          </div>
-        </div>
-      </section>
+      <div class="main-grid">
+        <!-- ── FORM COLUMN ── -->
+        <div class="form-column">
 
-      <!-- Sección 2: Precios y Stock -->
-      <section>
-        <h2 class="text-lg font-serif font-bold text-[#2a0002] border-b pb-2 mb-4">Precios e Inventario</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Precio (₡) *</label>
-            <input v-model.number="form.precio" type="number" min="0" step="0.01" required class="input-field">
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Stock (Unidades) *</label>
-            <input v-model.number="form.cantidad" type="number" min="0" required class="input-field">
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Descuento (%)</label>
-            <input v-model.number="form.descuento" type="number" min="0" max="100" class="input-field">
-          </div>
-        </div>
-      </section>
+          <!-- Section 01: Información Básica -->
+          <section>
+            <div class="section-header">
+              <span class="section-num">01</span>
+              <h2>Información Básica</h2>
+            </div>
+            <div class="input-grid">
+              <div class="form-group">
+                <label for="nombre">Nombre del Vino</label>
+                <input v-model="form.nombre" type="text" id="nombre" placeholder="ej. Château Margaux" required>
+              </div>
+              <div class="form-group">
+                <label for="anio_cosecha">Cosecha (Vintage)</label>
+                <input v-model.number="form.anio_cosecha" type="number" id="anio_cosecha" placeholder="2018">
+              </div>
+              <div class="form-group">
+                <label for="pais">País de Origen</label>
+                <input v-model="form.pais" list="paises-list" id="pais" class="premium-datalist-input" placeholder="Buscar país...">
+                <datalist id="paises-list">
+                  <option v-for="pais in paises" :key="pais" :value="pais"></option>
+                </datalist>
+              </div>
+              <div class="form-group">
+                <label for="region">Región / Terroir</label>
+                <input v-model="form.region" type="text" id="region" placeholder="Bordeaux">
+              </div>
+              <div class="form-group">
+                <label for="id_categoria">Categoría Editorial</label>
+                <select v-model="form.id_categoria" id="id_categoria" class="premium-select" required>
+                  <option value="" disabled>Seleccionar...</option>
+                  <option v-for="cat in categorias" :key="cat.id_categoria" :value="cat.id_categoria">
+                    {{ cat.nombre }}{{ cat.nombre_padre ? ` (de ${cat.nombre_padre})` : '' }}
+                  </option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="id_marca">Casa / Bodega</label>
+                <select v-model="form.id_marca" id="id_marca" class="premium-select" required>
+                  <option value="" disabled>Seleccionar...</option>
+                  <option v-for="marca in marcas" :key="marca.id_marca" :value="marca.id_marca">{{ marca.nombre }}</option>
+                </select>
+              </div>
+            </div>
+          </section>
 
-      <!-- Sección 3: Detalles Técnicos -->
-      <section>
-        <h2 class="text-lg font-serif font-bold text-[#2a0002] border-b pb-2 mb-4">Detalles Técnicos</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">País de Origen</label>
-            <input v-model="form.pais" type="text" list="paises" class="input-field" placeholder="Ej: Argentina">
-            <datalist id="paises">
-              <option v-for="pais in paises" :key="pais" :value="pais"></option>
-            </datalist>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Región</label>
-            <input v-model="form.region" type="text" class="input-field" placeholder="Ej: Mendoza">
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Año de Cosecha</label>
-            <input v-model.number="form.anio_cosecha" type="number" min="1900" :max="new Date().getFullYear() + 1" class="input-field">
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Alcohol (%)</label>
-            <input v-model.number="form.alcohol_porcentaje" type="number" min="0" max="100" step="0.1" class="input-field">
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Volumen (ml)</label>
-            <input v-model.number="form.contenido_ml" type="number" min="0" class="input-field" placeholder="Ej: 750">
-          </div>
-        </div>
-      </section>
-
-      <!-- Sección 4: Media y Estado -->
-      <section>
-        <h2 class="text-lg font-serif font-bold text-[#2a0002] border-b pb-2 mb-4">Multimedia y Estado</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="col-span-2">
-            <label class="block text-sm font-medium text-gray-700 mb-3">Imagen del Producto</label>
-            <div class="flex gap-4">
-              <div class="flex-1">
-                <div class="border-2 border-dashed border-gray-300 rounded-md p-6 text-center hover:border-gray-400 transition-colors cursor-pointer" @click="$refs.fileInput.click()">
-                  <input ref="fileInput" type="file" accept="image/*" class="hidden" @change="handleImageUpload">
-                  <span class="material-symbols-outlined block text-3xl text-gray-400 mb-2 mx-auto">image</span>
-                  <p class="text-sm text-gray-600">Haz clic para subir una imagen</p>
-                  <p class="text-xs text-gray-500 mt-1">PNG, JPG, GIF (máx. 2MB)</p>
-                  <div v-if="uploadingImage" class="mt-2">
-                    <span class="material-symbols-outlined animate-spin text-lg text-[#735c00]">progress_activity</span>
-                  </div>
+          <!-- Section 02: Detalles Técnicos -->
+          <section>
+            <div class="section-header">
+              <span class="section-num">02</span>
+              <h2>Detalles Técnicos</h2>
+            </div>
+            <div class="details-grid">
+              <div class="detail-card">
+                <label for="alcohol_porcentaje">Alcohol por Vol.</label>
+                <div class="value-wrapper">
+                  <input v-model.number="form.alcohol_porcentaje" type="number" step="0.1" id="alcohol_porcentaje" placeholder="13.5">
+                  <span class="unit">%</span>
                 </div>
               </div>
-              <div class="flex-1">
-                <label class="block text-sm font-medium text-gray-700 mb-1">O USA UNA URL</label>
-                <input v-model="form.imagen_url" type="url" class="input-field" placeholder="https://...">
+              <div class="detail-card">
+                <label for="contenido_ml">Contenido</label>
+                <div class="value-wrapper">
+                  <input v-model.number="form.contenido_ml" type="number" id="contenido_ml" placeholder="750">
+                  <span class="unit">ml</span>
+                </div>
+              </div>
+              <div class="detail-card">
+                <label>Estado Inicial</label>
+                <div class="status-toggle">
+                  <label class="switch">
+                    <input type="checkbox" v-model="form.estado">
+                    <span class="slider"></span>
+                  </label>
+                  <span class="stock-unit">{{ form.estado ? 'Activo' : 'Inactivo' }}</span>
+                </div>
               </div>
             </div>
-            <div v-if="form.imagen_url" class="mt-4">
-              <img :src="form.imagen_url" alt="Vista previa" class="h-32 object-contain rounded border border-gray-200">
+          </section>
+
+          <!-- Section 03: Nota del Sommelier -->
+          <section>
+            <div class="section-header">
+              <span class="section-num">03</span>
+              <h2>Nota del Sommelier</h2>
+            </div>
+            <div class="note-area">
+              <textarea v-model="form.descripcion" id="descripcion" rows="6" placeholder="Describe el carácter, bouquet y final de esta cosecha..."></textarea>
+              <div class="note-badge">Voz Editorial</div>
+            </div>
+          </section>
+
+          <!-- Section 04: Valoración y Stock -->
+          <section>
+            <div class="section-header">
+              <span class="section-num">04</span>
+              <h2>Valoración y Stock</h2>
+            </div>
+            <div class="storage-grid">
+              <div class="valuation-item">
+                <label for="precio">Precio Unitario</label>
+                <div class="valuation-input-wrapper">
+                  <span class="currency-symbol">₡</span>
+                  <input v-model.number="form.precio" type="number" step="0.01" id="precio" class="large-input" placeholder="0.00" required>
+                </div>
+              </div>
+              <div class="valuation-item">
+                <label for="cantidad">Cantidad en Cava</label>
+                <div class="valuation-input-wrapper">
+                  <input v-model.number="form.cantidad" type="number" id="cantidad" class="large-input" placeholder="0" required>
+                  <span class="stock-unit">Botellas</span>
+                </div>
+              </div>
+              <div class="valuation-item">
+                <label for="descuento">Descuento (%)</label>
+                <div class="valuation-input-wrapper">
+                  <input v-model.number="form.descuento" type="number" step="1" id="descuento" class="large-input" placeholder="0">
+                  <span class="stock-unit">% OFF</span>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- ── VISUAL COLUMN ── -->
+        <div class="visual-column">
+          <div class="section-header">
+            <span class="section-num">05</span>
+            <h2>Identidad Visual</h2>
+          </div>
+
+          <div :class="['upload-box', form.imagen_url ? 'has-image' : '']" id="image-container" @click="$refs.fileInput.click()" style="cursor:pointer;">
+            <img :src="form.imagen_url || ''" :class="['preview-img', form.imagen_url ? 'active' : '']" id="product-preview" alt="Preview">
+            <div class="upload-content">
+              <div class="upload-icon-circle">
+                <span class="material-symbols-outlined">image_search</span>
+              </div>
+              <h3>Estética de la Botella</h3>
+              <p>Sube una fotografía en alta resolución que capture la esencia de la etiqueta.</p>
             </div>
           </div>
-          <div class="col-span-2">
-            <label class="flex items-center gap-3 cursor-pointer p-4 border border-gray-200 rounded-md hover:bg-gray-50">
-              <input type="checkbox" v-model="form.estado" class="w-5 h-5 accent-[#2a0002]">
-              <div>
-                <span class="block font-medium text-gray-900">Producto Activo</span>
-                <span class="text-sm text-gray-500">Si está inactivo, no se mostrará en el catálogo público.</span>
-              </div>
-            </label>
+
+          <input ref="fileInput" type="file" accept="image/*" style="display:none;" @change="handleImageUpload">
+
+          <div v-if="uploadingImage" style="text-align:center;margin-top:12px;">
+            <span class="material-symbols-outlined" style="font-size:24px;color:var(--tertiary);animation:spin 1s linear infinite;">progress_activity</span>
+          </div>
+
+          <div class="form-group" style="margin-top: 24px;">
+            <label for="imagen_url">URL de la Imagen Editorial</label>
+            <input v-model="form.imagen_url" type="text" id="imagen_url" placeholder="https://ejemplo.com/imagen.jpg" class="url-input">
+          </div>
+
+          <div class="curator-tip">
+            <div class="tip-header">
+              <span class="material-symbols-outlined" style="font-size: 14px;">auto_awesome</span>
+              Tip del Curador
+            </div>
+            <p class="tip-text">
+              "Al catalogar vinos de alta gama, asegúrese de resaltar la región y la cosecha, ya que son factores críticos para la valoración del coleccionista."
+            </p>
           </div>
         </div>
-      </section>
-
-      <div class="flex justify-end gap-3 pt-6 border-t border-gray-100">
-        <router-link :to="{ name: 'admin.productos.index' }" class="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-md font-medium hover:bg-gray-50 transition-colors">
-          Cancelar
-        </router-link>
-        <button type="submit" :disabled="loadingSubmit" class="px-6 py-2.5 bg-[#2a0002] text-white rounded-md font-medium hover:bg-[#3d0003] transition-colors disabled:opacity-50">
-          {{ loadingSubmit ? 'Guardando...' : 'Crear Producto' }}
-        </button>
       </div>
     </form>
   </div>
@@ -257,16 +304,9 @@ onMounted(fetchFormData)
 </script>
 
 <style scoped>
-.input-field {
-  width: 100%;
-  padding: 0.5rem 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.375rem;
-  transition: all 0.2s;
-}
-.input-field:focus {
-  outline: none;
-  border-color: #2a0002;
-  box-shadow: 0 0 0 1px #2a0002;
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
 }
 </style>
+

@@ -208,27 +208,32 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { ProductoController } from '@/controllers'
+import { useCartStore } from '@/stores/cart'
+import { useNotificationStore } from '@/stores/notifications'
 
 const route = useRoute()
+const cart = useCartStore()
+const notif = useNotificationStore()
 const producto = ref({})
 const relacionados = ref([])
 
 const formatPrice = (price) => parseFloat(price).toFixed(2)
 
-const agregarAlCarrito = async (id) => {
+function agregarAlCarrito(idProducto) {
   try {
-    const response = await fetch(`/api/carrito/agregar/${id}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' }
+    const p = producto.value
+    const result = cart.addItem(idProducto, {
+      nombre: p.nombre,
+      precio: p.descuento > 0
+        ? p.precio * (1 - p.descuento / 100)
+        : p.precio,
+      imagen: p.imagen_url,
     })
-    const data = await response.json()
-    if (data.success) {
-      window.showNotification(data.mensaje || 'Producto agregado correctamente')
-      window.dispatchEvent(new Event('cart-updated'))
-    }
-  } catch (error) {
-    console.error('Error:', error)
-    window.showNotification('Error al agregar al carrito', 'error')
+    notif.show(result.mensaje || 'Producto agregado al carrito', 'success')
+    window.dispatchEvent(new Event('cart-updated'))
+  } catch (err) {
+    console.error('Error al agregar al carrito:', err)
+    notif.show('Error al agregar al carrito', 'error')
   }
 }
 

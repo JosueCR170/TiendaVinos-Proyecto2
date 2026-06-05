@@ -1,70 +1,85 @@
 <template>
-  <div class="form-view max-w-2xl mx-auto">
-    <header class="mb-8 flex items-center justify-between">
-      <div>
-        <h1 class="text-3xl font-bold font-serif text-[#2a0002]">Editar Variedad</h1>
-        <p class="text-gray-600 mt-2">Modifica el nombre de la cepa.</p>
-      </div>
-      <router-link :to="{ name: 'admin.variedades.index' }" class="text-sm font-medium text-gray-500 hover:text-gray-900 flex items-center gap-1">
-        <span class="material-symbols-outlined text-sm">arrow_back</span>
-        Volver
-      </router-link>
-    </header>
-
-    <div v-if="initialLoading" class="flex justify-center p-12">
-      <span class="material-symbols-outlined animate-spin text-3xl text-[#735c00]">progress_activity</span>
+  <div class="create-view-wrapper">
+    <div v-if="initialLoading" style="display:flex;justify-content:center;padding:80px 0;">
+      <span class="material-symbols-outlined" style="font-size:48px;color:var(--tertiary);animation:spin 1s linear infinite;">progress_activity</span>
     </div>
 
-    <form v-else @submit.prevent="submitForm" class="bg-white p-8 rounded-lg shadow-sm border border-gray-100">
-      <div v-if="error" class="mb-6 bg-red-50 text-red-700 p-4 rounded-md text-sm border border-red-200">
-        {{ error }}
-      </div>
+    <form v-else @submit.prevent="submitForm">
 
-      <div class="space-y-6">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Nombre de la Variedad *</label>
-          <input 
-            v-model="form.nombre" 
-            type="text" 
-            required 
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#2a0002]"
-          >
+      <header class="header-section">
+        <div class="header-text">
+          <h1>Editar Variedad de Uva</h1>
+          <p>Actualiza la definición y perfil de esta cepa en la cava.</p>
         </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Tipo *</label>
-          <select
-            v-model="form.tipo"
-            required
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#2a0002]"
-          >
-            <option value="">Seleccionar tipo</option>
-            <option value="Tinta">Tinta</option>
-            <option value="Blanca">Blanca</option>
-            <option value="Aromatica">Aromatica</option>
-          </select>
+        <div class="header-actions">
+          <router-link :to="{ name: 'admin.variedades.index' }" class="btn-discard">Descartar</router-link>
+          <button type="submit" class="btn-save" :disabled="loading">
+            {{ loading ? 'Actualizando...' : 'Actualizar Variedad' }}
+          </button>
         </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Descripcion</label>
-          <textarea
-            v-model="form.descripcion"
-            rows="3"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#2a0002]"
-          ></textarea>
+      </header>
+
+      <div v-if="error" class="alert-premium error" style="margin-bottom:32px;">
+        <span class="material-symbols-outlined alert-icon">error</span>
+        <div class="alert-content">
+          <span class="alert-title">Error</span>
+          <p class="alert-message">{{ error }}</p>
         </div>
       </div>
 
-      <div class="mt-8 flex justify-end gap-3 pt-6 border-t border-gray-100">
-        <router-link :to="{ name: 'admin.variedades.index' }" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-50 transition-colors">
-          Cancelar
-        </router-link>
-        <button 
-          type="submit" 
-          :disabled="loading"
-          class="px-4 py-2 bg-[#2a0002] text-white rounded-md text-sm font-medium hover:bg-[#3d0003] transition-colors disabled:opacity-50"
-        >
-          {{ loading ? 'Guardando...' : 'Actualizar Variedad' }}
-        </button>
+      <div class="main-grid">
+        <div class="form-column">
+
+          <!-- Section 01 -->
+          <section>
+            <div class="section-header">
+              <span class="section-num">01</span>
+              <h2>Perfil de la Variedad</h2>
+            </div>
+            <div class="input-grid">
+              <div class="form-group">
+                <label for="nombre">Nombre de la Variedad</label>
+                <input v-model="form.nombre" type="text" id="nombre" placeholder="ej. Cabernet Sauvignon" required>
+              </div>
+              <div class="form-group">
+                <label for="tipo">Tipo de Uva</label>
+                <select v-model="form.tipo" id="tipo" class="premium-select" required>
+                  <option value="" disabled>Seleccionar...</option>
+                  <option value="Tinta">Tinta</option>
+                  <option value="Blanca">Blanca</option>
+                  <option value="Aromatica">Aromatica</option>
+                </select>
+              </div>
+            </div>
+          </section>
+
+          <!-- Section 02 -->
+          <section>
+            <div class="section-header">
+              <span class="section-num">02</span>
+              <h2>Notas de Cepa</h2>
+            </div>
+            <div class="note-area">
+              <textarea v-model="form.descripcion" id="descripcion" rows="6" placeholder="Describe las características típicas, aromas y sabores de esta variedad..."></textarea>
+              <div class="note-badge">Voz de Sommelier</div>
+            </div>
+          </section>
+
+        </div>
+
+        <div class="visual-column">
+          <div class="curator-tip">
+            <div class="tip-header">
+              <span class="material-symbols-outlined" style="font-size:14px;">auto_awesome</span>
+              Identidad del Terroir
+            </div>
+            <p class="tip-text">
+              "Al editar, asegúrese de que la descripción sea fiel a las características de la cepa para guiar correctamente al consumidor."
+            </p>
+          </div>
+        </div>
       </div>
+
     </form>
   </div>
 </template>
@@ -93,14 +108,10 @@ const form = reactive({
 async function fetchData() {
   try {
     const result = await VariedadController.obtenerVariedadPorId(id)
-
-    if (!result.success) {
-      throw new Error(result.message)
-    }
-
+    if (!result.success) throw new Error(result.message)
     form.nombre = result.variedad.nombre
     form.tipo = result.variedad.tipo
-    form.descripcion = result.variedad.descripcion
+    form.descripcion = result.variedad.descripcion || ''
   } catch (err) {
     error.value = 'No se encontró la variedad.'
     console.error(err)
@@ -114,19 +125,13 @@ async function submitForm() {
   error.value = null
   try {
     const result = await VariedadController.actualizarVariedad(id, form)
-
-    if (!result.success) {
-      throw result
-    }
-
+    if (!result.success) throw result
     notif.show('Variedad actualizada exitosamente.')
     router.push({ name: 'admin.variedades.index' })
   } catch (err) {
-    if (err.status === 422) {
-      error.value = err.message || 'Datos inválidos.'
-    } else {
-      error.value = 'Ocurrió un error inesperado.'
-    }
+    error.value = err.status === 422
+      ? err.message || 'Datos inválidos.'
+      : 'Ocurrió un error inesperado.'
   } finally {
     loading.value = false
   }
@@ -134,3 +139,10 @@ async function submitForm() {
 
 onMounted(fetchData)
 </script>
+
+<style scoped>
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+</style>

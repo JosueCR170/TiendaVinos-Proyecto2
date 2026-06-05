@@ -244,7 +244,7 @@ const fmt = (n) => Number(n).toFixed(2)
 
 async function fetchHome() {
   try {
-    const { data } = await api.get('/home')
+    const { data } = await api.get('/v1/home')
     destacados.value = data.destacados ?? []
     descuentos.value = data.descuentos ?? []
   } catch (e) {

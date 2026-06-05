@@ -110,7 +110,7 @@ async function fetchStats() {
   loading.value = true
   error.value = null
   try {
-    const { data } = await api.get('/admin/dashboard')
+    const { data } = await api.get('/v1/admin/dashboard')
     stats.value = data.data
   } catch (err) {
     error.value = 'No se pudieron cargar las estadísticas.'

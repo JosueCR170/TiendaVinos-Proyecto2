@@ -1,9 +1,18 @@
 <template>
-  <div class="admin-layout">
+  <div class="admin-wrapper">
     <!-- ── Sidebar ────────────────────────────────────────────────────────── -->
-    <aside class="admin-sidebar">
+    <aside class="sidebar">
       <div class="sidebar-header">
-        <RouterLink to="/admin" class="admin-brand">Panel Admin</RouterLink>
+        <span class="brand-name">La Última Botella</span>
+        <div class="admin-profile">
+          <div class="profile-avatar">
+            <span class="material-symbols-outlined">person</span>
+          </div>
+          <div class="profile-info">
+            <span class="profile-name">Admin</span>
+            <span class="profile-role">Panel de Control</span>
+          </div>
+        </div>
       </div>
 
       <nav class="sidebar-nav">
@@ -34,28 +43,15 @@
       </nav>
 
       <div class="sidebar-footer">
-        <RouterLink to="/" class="back-link">
-          <span class="material-symbols-outlined">arrow_back</span>
-          <span>Volver a la Tienda</span>
+        <RouterLink to="/" class="btn-store-link">
+          Volver a la Tienda
         </RouterLink>
       </div>
     </aside>
 
     <!-- ── Contenido principal ────────────────────────────────────────────── -->
-    <main class="admin-main">
-      <header class="admin-topbar">
-        <div class="topbar-left">
-          <span class="material-symbols-outlined menu-toggle">menu</span>
-        </div>
-        <div class="topbar-right">
-          <div class="user-profile">
-            <span class="material-symbols-outlined">account_circle</span>
-            <span>Administrador</span>
-          </div>
-        </div>
-      </header>
-
-      <div class="admin-content">
+    <main class="main-content">
+      <div class="content-container">
         <RouterView />
       </div>
     </main>
@@ -88,128 +84,6 @@ const notifications = computed(() => notificationStore.list)
 </script>
 
 <style scoped>
-.admin-layout {
-  display: flex;
-  min-height: 100vh;
-  background-color: #f5f5f5;
-  font-family: 'Manrope', sans-serif;
-}
-
-/* Sidebar */
-.admin-sidebar {
-  width: 260px;
-  background-color: #2a0002;
-  color: #e4e4cc;
-  display: flex;
-  flex-direction: column;
-  flex-shrink: 0;
-}
-
-.sidebar-header {
-  padding: 1.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.admin-brand {
-  font-family: 'Noto Serif', serif;
-  font-size: 1.25rem;
-  font-style: italic;
-  font-weight: 700;
-  color: #fff;
-  text-decoration: none;
-}
-
-.sidebar-nav {
-  padding: 1rem 0;
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.nav-item {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1.5rem;
-  color: rgba(228, 228, 204, 0.7);
-  text-decoration: none;
-  transition: all 0.2s;
-}
-
-.nav-item:hover {
-  background-color: rgba(255, 255, 255, 0.05);
-  color: #fff;
-}
-
-.nav-item.active {
-  background-color: #735c00;
-  color: #fff;
-  border-right: 4px solid #fbfbe2;
-}
-
-.nav-item .material-symbols-outlined {
-  font-size: 1.25rem;
-}
-
-.sidebar-footer {
-  padding: 1.5rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.back-link {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: rgba(228, 228, 204, 0.7);
-  text-decoration: none;
-  font-size: 0.875rem;
-  transition: color 0.2s;
-}
-
-.back-link:hover {
-  color: #fff;
-}
-
-/* Main Content */
-.admin-main {
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.admin-topbar {
-  height: 64px;
-  background-color: #fff;
-  border-bottom: 1px solid #e5e5e5;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 2rem;
-  flex-shrink: 0;
-}
-
-.menu-toggle {
-  cursor: pointer;
-  color: #666;
-}
-
-.user-profile {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: #333;
-  font-weight: 500;
-  font-size: 0.875rem;
-}
-
-.admin-content {
-  padding: 2rem;
-  overflow-y: auto;
-  flex-grow: 1;
-}
-
 /* Notificaciones */
 .notification-container {
   position: fixed;
