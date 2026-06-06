@@ -1,26 +1,31 @@
 <template>
-  <div class="dashboard-view">
-    <header class="mb-8">
-      <h1 class="text-3xl font-bold font-serif text-[#2a0002]">Dashboard</h1>
-      <p class="text-gray-600 mt-2">Visión general del inventario y bodega.</p>
+  <div class="index-view">
+    <header class="index-header mb-8">
+      <div class="header-info">
+        <h1>Dashboard General</h1>
+        <p>Visión general del inventario, bodegas y estado de la cava.</p>
+      </div>
     </header>
 
-    <div v-if="loading" class="flex justify-center p-12">
+    <div v-if="loading" class="p-8 flex justify-center">
       <span class="material-symbols-outlined animate-spin text-4xl text-[#735c00]">progress_activity</span>
     </div>
 
-    <div v-else-if="error" class="bg-red-100 text-red-800 p-4 rounded-md flex items-center gap-3">
-      <span class="material-symbols-outlined">error</span>
-      {{ error }}
-      <button @click="fetchStats" class="ml-auto underline font-medium">Reintentar</button>
+    <div v-else-if="error" class="alert-premium error">
+      <span class="material-symbols-outlined alert-icon">error</span>
+      <div class="alert-content">
+        <span class="alert-title">Error</span>
+        <p class="alert-message">{{ error }}</p>
+      </div>
+      <button @click="fetchStats" class="btn-filter" style="margin-left: auto;">Reintentar</button>
     </div>
 
-    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
       
       <!-- Total Productos -->
       <div class="stat-card">
-        <div class="stat-icon bg-blue-100 text-blue-800">
-          <span class="material-symbols-outlined">wine_bar</span>
+        <div class="stat-icon bg-wine">
+          <span class="material-symbols-outlined text-white">wine_bar</span>
         </div>
         <div class="stat-content">
           <p class="stat-label">Total Productos</p>
@@ -30,7 +35,7 @@
 
       <!-- Productos Activos -->
       <div class="stat-card">
-        <div class="stat-icon bg-green-100 text-green-800">
+        <div class="stat-icon bg-[#efefd7] text-primary">
           <span class="material-symbols-outlined">check_circle</span>
         </div>
         <div class="stat-content">
@@ -41,18 +46,18 @@
 
       <!-- Sin Stock -->
       <div class="stat-card">
-        <div class="stat-icon bg-red-100 text-red-800">
+        <div class="stat-icon bg-[#ffdad6] text-[#ba1a1a]">
           <span class="material-symbols-outlined">warning</span>
         </div>
         <div class="stat-content">
-          <p class="stat-label">Sin Stock</p>
+          <p class="stat-label">Sin Stock (Agotados)</p>
           <p class="stat-value text-red-600">{{ stats.productos_sin_stock }}</p>
         </div>
       </div>
 
       <!-- Con Descuento -->
       <div class="stat-card">
-        <div class="stat-icon bg-yellow-100 text-yellow-800">
+        <div class="stat-icon bg-[#ffe088] text-[#735c00]">
           <span class="material-symbols-outlined">sell</span>
         </div>
         <div class="stat-content">
@@ -63,8 +68,8 @@
 
       <!-- Total Categorías -->
       <div class="stat-card">
-        <div class="stat-icon bg-purple-100 text-purple-800">
-          <span class="material-symbols-outlined">category</span>
+        <div class="stat-icon bg-wine">
+          <span class="material-symbols-outlined text-white">category</span>
         </div>
         <div class="stat-content">
           <p class="stat-label">Categorías</p>
@@ -74,7 +79,7 @@
 
       <!-- Total Marcas -->
       <div class="stat-card">
-        <div class="stat-icon bg-indigo-100 text-indigo-800">
+        <div class="stat-icon bg-[#efefd7] text-primary">
           <span class="material-symbols-outlined">storefront</span>
         </div>
         <div class="stat-content">
@@ -85,7 +90,7 @@
 
       <!-- Total Variedades -->
       <div class="stat-card">
-        <div class="stat-icon bg-pink-100 text-pink-800">
+        <div class="stat-icon bg-[#ffe088] text-[#735c00]">
           <span class="material-symbols-outlined">local_florist</span>
         </div>
         <div class="stat-content">
@@ -125,34 +130,37 @@ onMounted(fetchStats)
 
 <style scoped>
 .stat-card {
-  background-color: white;
-  padding: 1.5rem;
-  border-radius: 0.75rem;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  border: 1px solid #f3f4f6;
+  background-color: var(--surface-container-low);
+  padding: 2rem;
+  border-radius: 12px;
+  border: 1px solid rgba(218, 193, 191, 0.15);
   display: flex;
   align-items: center;
-  gap: 1.25rem;
+  gap: 1.5rem;
   transition: transform 0.2s, box-shadow 0.2s;
 }
 .stat-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 10px 20px rgba(42, 0, 2, 0.05);
+  background-color: var(--surface-container-high);
 }
 
 .stat-icon {
-  width: 3.5rem;
-  height: 3.5rem;
-  border-radius: 9999px;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
 
+.bg-wine {
+  background-color: var(--primary);
+}
+
 .stat-icon .material-symbols-outlined {
-  font-size: 1.875rem;
-  line-height: 2.25rem;
+  font-size: 2rem;
 }
 
 .stat-content {
@@ -161,34 +169,19 @@ onMounted(fetchStats)
 }
 
 .stat-label {
-  font-size: 0.875rem;
-  color: #6b7280;
-  font-weight: 500;
+  font-size: 0.75rem;
+  color: var(--secondary);
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.1em;
   margin-bottom: 0.25rem;
 }
 
 .stat-value {
-  font-size: 1.875rem;
+  font-family: var(--font-headline);
+  font-size: 2.25rem;
   font-weight: 700;
-  color: #111827;
+  color: var(--primary);
+  line-height: 1;
 }
-
-/* Colores de íconos */
-.bg-blue-100 { background-color: #dbeafe; }
-.text-blue-800 { color: #1e40af; }
-.bg-green-100 { background-color: #dcfce7; }
-.text-green-800 { color: #166534; }
-.bg-red-100 { background-color: #fee2e2; }
-.text-red-800 { color: #991b1b; }
-.text-red-600 { color: #dc2626; }
-.bg-yellow-100 { background-color: #fef9c3; }
-.text-yellow-800 { color: #854d0e; }
-.bg-purple-100 { background-color: #f3e8ff; }
-.text-purple-800 { color: #6b21a8; }
-.bg-indigo-100 { background-color: #e0e7ff; }
-.text-indigo-800 { color: #3730a3; }
-.bg-pink-100 { background-color: #fce7f3; }
-.text-pink-800 { color: #9d174d; }
 </style>

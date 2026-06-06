@@ -2,97 +2,94 @@
   <div class="index-view">
     <header class="index-header">
       <div class="header-info">
-        <h1 class="text-3xl font-bold font-serif text-[#2a0002]">Categorías</h1>
-        <p class="text-gray-600 mt-2">Gestiona las categorías editoriales que estructuran la cava digital.</p>
+        <h1>Arquitectura de Colección</h1>
+        <p>Gestiona las categorías editoriales que estructuran la cava digital.</p>
       </div>
       <div class="header-actions">
-        <router-link :to="{ name: 'admin.categorias.create' }" class="btn-primary">
+        <router-link :to="{ name: 'admin.categorias.create' }" class="btn-create">
           <span class="material-symbols-outlined">add</span>
-          Nueva Categoría Principal
+          <span>Nueva Categoría Principal</span>
         </router-link>
       </div>
     </header>
 
     <!-- Barra de Filtros -->
-    <div class="filter-bar mt-6 bg-white p-4 rounded-lg shadow-sm border border-gray-100 flex gap-4">
-      <div class="flex-grow flex items-center bg-gray-50 border border-gray-200 rounded-md px-3 py-2">
-        <span class="material-symbols-outlined text-gray-400 mr-2">search</span>
+    <div class="filter-bar">
+      <div class="filter-group">
+        <span class="material-symbols-outlined filter-icon">search</span>
         <input 
           v-model="searchQuery" 
           type="text" 
-          class="bg-transparent border-none outline-none w-full text-sm" 
+          class="filter-input" 
           placeholder="Buscar categorías..."
         >
       </div>
-      <button @click="clearSearch" v-if="searchQuery" class="text-gray-500 hover:text-gray-800 text-sm font-medium">Limpiar</button>
+      <button @click="clearSearch" v-if="searchQuery" class="btn-filter">Limpiar Filtros</button>
     </div>
 
     <!-- Tabla -->
-    <div class="table-wrapper mt-6 bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+    <div class="table-wrapper">
       <div v-if="loading" class="p-8 flex justify-center">
         <span class="material-symbols-outlined animate-spin text-3xl text-[#735c00]">progress_activity</span>
       </div>
       <div v-else-if="error" class="p-8 text-center text-red-600">
         {{ error }}
       </div>
-      <table v-else class="w-full text-left border-collapse">
+      <table v-else class="premium-table">
         <thead>
-          <tr class="bg-gray-50 border-b border-gray-200 text-gray-600 text-xs uppercase tracking-wider">
-            <th class="p-4 font-medium">Estructura de Categoría</th>
-            <th class="p-4 font-medium">Nivel</th>
-            <th class="p-4 font-medium">Padre</th>
-            <th class="p-4 font-medium text-right">Acciones</th>
+          <tr>
+            <th>Estructura de Categoría</th>
+            <th>Nivel</th>
+            <th>Padre</th>
+            <th class="actions-cell">Acciones</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-gray-100">
+        <tbody>
           <tr 
             v-for="cat in filteredCategorias" 
             :key="cat.id_categoria"
-            class="hover:bg-gray-50 transition-colors"
           >
-            <td class="p-4">
-              <div class="flex items-center gap-3" :class="{ 'pl-8': cat.nivel > 1 }">
-                <span v-if="cat.nivel === 1" class="material-symbols-outlined text-[#735c00]">folder_open</span>
-                <span v-else class="text-gray-300">—</span>
-                <div>
-                  <p class="font-medium text-gray-900">{{ cat.nombre }}</p>
-                  <p v-if="cat.descripcion" class="text-xs text-gray-500 truncate max-w-xs">{{ cat.descripcion }}</p>
+            <td>
+              <div class="product-cell" :style="{ paddingLeft: cat.nivel > 1 ? '2rem' : '0' }">
+                <span v-if="cat.nivel === 1" class="material-symbols-outlined text-secondary" style="font-size: 20px;">folder</span>
+                <span v-else class="text-on-surface-variant/40">—</span>
+                <div class="product-name-info">
+                  <span class="product-name">{{ cat.nombre }}</span>
+                  <span v-if="cat.descripcion" class="product-meta">{{ cat.descripcion }}</span>
                 </div>
               </div>
             </td>
-            <td class="p-4">
-              <span class="px-2 py-1 text-xs rounded-full font-medium"
-                :class="cat.nivel === 1 ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'"
-              >
+            <td>
+              <span class="badge" :class="cat.nivel === 1 ? 'badge-success' : 'badge-neutral'">
                 {{ cat.nivel === 1 ? 'Principal' : 'Subnivel' }}
               </span>
             </td>
-            <td class="p-4 text-sm text-gray-600">
+            <td class="text-sm text-on-surface-variant">
               {{ cat.padre ? cat.padre.nombre : 'Raíz' }}
             </td>
-            <td class="p-4 text-right">
+            <td class="actions-cell">
               <div class="flex justify-end gap-2">
                 <router-link 
                   v-if="cat.nivel === 1"
                   :to="{ name: 'admin.categorias.create', query: { parent_id: cat.id_categoria } }"
-                  class="p-2 text-[#735c00] hover:bg-yellow-50 rounded-full transition-colors"
+                  class="action-btn"
                   title="Agregar Subcategoría"
                 >
-                  <span class="material-symbols-outlined text-sm">add_circle</span>
+                  <span class="material-symbols-outlined">add_circle</span>
                 </router-link>
                 <router-link 
                   :to="{ name: 'admin.categorias.edit', params: { id: cat.id_categoria } }"
-                  class="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
+                  class="action-btn"
                   title="Editar"
                 >
-                  <span class="material-symbols-outlined text-sm">edit</span>
+                  <span class="material-symbols-outlined">edit</span>
                 </router-link>
                 <button 
                   @click="confirmDelete(cat)"
-                  class="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors"
+                  class="action-btn delete"
                   title="Eliminar"
                 >
-                  <span class="material-symbols-outlined text-sm">delete</span>
+                  <span class="material-symbols-outlined">delete</span>
                 </button>
               </div>
             </td>
@@ -170,21 +167,3 @@ function clearSearch() {
 
 onMounted(fetchCategorias)
 </script>
-
-<style scoped>
-.btn-primary {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  background-color: #2a0002;
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 0.375rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  transition: background-color 0.2s;
-}
-.btn-primary:hover {
-  background-color: #3d0003;
-}
-</style>

@@ -14,15 +14,26 @@
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
           <!-- Left: Image -->
           <div class="lg:col-span-5 relative">
-            <div class="bg-surface-container-low rounded-lg p-12 lg:sticky lg:top-32 shadow-[0_20px_40px_-10px_rgba(27,29,14,0.06)] aspect-[3/4] flex items-center justify-center">
-              <template v-if="producto.imagen_url">
-                <img :alt="producto.nombre" class="max-w-full max-h-full object-contain transform hover:scale-105 transition-transform duration-700" :src="producto.imagen_url"/>
-              </template>
-              <template v-else>
-                <div class="flex items-center justify-center">
-                  <span class="material-symbols-outlined text-9xl text-outline-variant/30">wine_bar</span>
-                </div>
-              </template>
+            <div class="bg-surface-container-low rounded-lg p-12 lg:sticky lg:top-32 shadow-[0_20px_40px_-10px_rgba(27,29,14,0.06)] aspect-[3/4] flex flex-col items-center justify-between">
+              <div class="w-full flex-grow flex items-center justify-center">
+                <template v-if="producto.imagen_url">
+                  <img :alt="producto.nombre" class="max-w-full max-h-full object-contain transform hover:scale-105 transition-transform duration-700" :src="producto.imagen_url"/>
+                </template>
+                <template v-else>
+                  <div class="flex items-center justify-center">
+                    <span class="material-symbols-outlined text-9xl text-outline-variant/30">wine_bar</span>
+                  </div>
+                </template>
+              </div>
+              <div class="w-full pt-6 border-t border-outline-variant/20 flex justify-center">
+                <router-link
+                  :to="{ name: 'admin.productos.index', query: { search: producto.nombre } }"
+                  class="flex items-center gap-2 font-label text-xs uppercase tracking-widest text-[#735c00] hover:text-primary transition-colors font-bold"
+                >
+                  <span class="material-symbols-outlined text-base">edit</span>
+                  Editar producto en Admin
+                </router-link>
+              </div>
             </div>
           </div>
 

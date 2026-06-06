@@ -1,78 +1,99 @@
 <template>
   <div class="index-view">
-    <header class="index-header mb-6 flex items-end justify-between">
+    <header class="index-header">
       <div class="header-info">
-        <h1 class="text-3xl font-bold font-serif text-[#2a0002]">Marcas</h1>
-        <p class="text-gray-600 mt-2">Gestiona las bodegas y marcas productoras.</p>
+        <h1>Casas y Bodegas</h1>
+        <p>Gestiona los productores y casas vinícolas que dan vida a la colección.</p>
       </div>
       <div class="header-actions">
-        <router-link :to="{ name: 'admin.marcas.create' }" class="btn-primary">
+        <router-link :to="{ name: 'admin.marcas.create' }" class="btn-create">
           <span class="material-symbols-outlined">add</span>
-          Nueva Marca
+          <span>Nueva Bodega</span>
         </router-link>
       </div>
     </header>
 
     <!-- Barra de Filtros -->
-    <div class="filter-bar bg-white p-4 rounded-lg shadow-sm border border-gray-100 flex gap-4 mb-6">
-      <div class="flex-grow flex items-center bg-gray-50 border border-gray-200 rounded-md px-3 py-2">
-        <span class="material-symbols-outlined text-gray-400 mr-2">search</span>
+    <div class="filter-bar">
+      <div class="filter-group">
+        <span class="material-symbols-outlined filter-icon">search</span>
         <input 
           v-model="searchQuery" 
           type="text" 
-          class="bg-transparent border-none outline-none w-full text-sm" 
-          placeholder="Buscar marcas..."
+          class="filter-input" 
+          placeholder="Buscar por nombre o descripción..."
         >
       </div>
-      <button @click="clearSearch" v-if="searchQuery" class="text-gray-500 hover:text-gray-800 text-sm font-medium">Limpiar</button>
+      <div class="filter-group">
+        <span class="material-symbols-outlined filter-icon">public</span>
+        <input 
+          v-model="searchPais" 
+          type="text" 
+          class="filter-input" 
+          placeholder="Buscar por país..."
+        >
+      </div>
+      <button @click="clearFilters" v-if="searchQuery || searchPais" class="btn-filter">Limpiar Filtros</button>
     </div>
 
     <!-- Tabla -->
-    <div class="table-wrapper bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+    <div class="table-wrapper">
       <div v-if="loading" class="p-8 flex justify-center">
         <span class="material-symbols-outlined animate-spin text-3xl text-[#735c00]">progress_activity</span>
       </div>
       <div v-else-if="error" class="p-8 text-center text-red-600">
         {{ error }}
       </div>
-      <table v-else class="w-full text-left border-collapse">
+      <table v-else class="premium-table">
         <thead>
-          <tr class="bg-gray-50 border-b border-gray-200 text-gray-600 text-xs uppercase tracking-wider">
-            <th class="p-4 font-medium w-16">ID</th>
-            <th class="p-4 font-medium">Nombre de la Marca / Bodega</th>
-            <th class="p-4 font-medium text-right">Acciones</th>
+          <tr>
+            <th>Bodega y Origen</th>
+            <th>Presencia Digital</th>
+            <th class="actions-cell">Acciones</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-gray-100">
+        <tbody>
           <tr 
             v-for="item in filteredList" 
             :key="item.id_marca"
-            class="hover:bg-gray-50 transition-colors"
           >
-            <td class="p-4 text-sm text-gray-500">#{{ item.id_marca }}</td>
-            <td class="p-4 font-medium text-gray-900">{{ item.nombre }}</td>
-            <td class="p-4 text-right">
+            <td>
+              <div class="product-cell">
+                <div class="product-name-info">
+                  <span class="product-name">{{ item.nombre }}</span>
+                  <span class="product-meta">{{ item.pais || 'N/A' }} — {{ item.descripcion || 'Sin descripción' }}</span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <a v-if="item.sitio_web" :href="item.sitio_web" target="_blank" class="text-secondary hover:text-primary transition-colors text-sm font-medium flex items-center gap-1">
+                <span class="material-symbols-outlined text-base">language</span>
+                Visitar Sitio
+              </a>
+              <span v-else class="text-on-surface-variant/40 text-sm">N/A</span>
+            </td>
+            <td class="actions-cell">
               <div class="flex justify-end gap-2">
                 <router-link 
                   :to="{ name: 'admin.marcas.edit', params: { id: item.id_marca } }"
-                  class="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
+                  class="action-btn"
                   title="Editar"
                 >
-                  <span class="material-symbols-outlined text-sm">edit</span>
+                  <span class="material-symbols-outlined">edit</span>
                 </router-link>
                 <button 
                   @click="confirmDelete(item)"
-                  class="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors"
+                  class="action-btn delete"
                   title="Eliminar"
                 >
-                  <span class="material-symbols-outlined text-sm">delete</span>
+                  <span class="material-symbols-outlined">delete</span>
                 </button>
               </div>
             </td>
           </tr>
           <tr v-if="filteredList.length === 0">
             <td colspan="3" class="p-8 text-center text-gray-500">
-              No se encontraron marcas.
+              No se encontraron marcas o bodegas.
             </td>
           </tr>
         </tbody>
@@ -91,11 +112,14 @@ const items = ref([])
 const loading = ref(true)
 const error = ref(null)
 const searchQuery = ref('')
+const searchPais = ref('')
 
 const filteredList = computed(() => {
-  if (!searchQuery.value) return items.value
-  const q = searchQuery.value.toLowerCase()
-  return items.value.filter(item => item.nombre.toLowerCase().includes(q))
+  return items.value.filter(item => {
+    const matchName = !searchQuery.value || item.nombre.toLowerCase().includes(searchQuery.value.toLowerCase()) || (item.descripcion && item.descripcion.toLowerCase().includes(searchQuery.value.toLowerCase()))
+    const matchPais = !searchPais.value || (item.pais && item.pais.toLowerCase().includes(searchPais.value.toLowerCase()))
+    return matchName && matchPais
+  })
 })
 
 async function fetchItems() {
@@ -133,23 +157,10 @@ async function confirmDelete(item) {
   }
 }
 
-function clearSearch() { searchQuery.value = '' }
+function clearFilters() {
+  searchQuery.value = ''
+  searchPais.value = ''
+}
 
 onMounted(fetchItems)
 </script>
-
-<style scoped>
-.btn-primary {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  background-color: #2a0002;
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 0.375rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  transition: background-color 0.2s;
-}
-.btn-primary:hover { background-color: #3d0003; }
-</style>
