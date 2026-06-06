@@ -6,9 +6,9 @@ use Illuminate\Http\Request;
 use App\Models\Producto;
 use Illuminate\Support\Facades\DB;
 
-class CheckoutController extends Controller
+class PedidoController extends Controller
 {
-    public function pay(Request $request)
+    public function store(Request $request)
     {
         $carrito = $request->input('carrito', []);
 

@@ -21,5 +21,5 @@ Route::prefix('v1/')->name('api.')->group(function () {
     Route::get('home', [\App\Http\Controllers\DashboardController::class, 'home'])->name('home');
     Route::get('admin/dashboard', [\App\Http\Controllers\DashboardController::class, 'stats'])->name('admin.dashboard');
 
-    Route::post('checkout/pay', [\App\Http\Controllers\CheckoutController::class, 'pay'])->name('checkout.pay');
+    Route::apiResource('pedidos', \App\Http\Controllers\PedidoController::class)->only(['store']);
 });
