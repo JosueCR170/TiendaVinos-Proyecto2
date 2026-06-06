@@ -128,7 +128,7 @@ const confirmarPago = async () => {
       carritoPayload[item.idProducto] = item
     })
 
-    const response = await fetch('/api/v1/checkout/pay', {
+    const response = await fetch('/api/v1/pedidos', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ carrito: carritoPayload })
