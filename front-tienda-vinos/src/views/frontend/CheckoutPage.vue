@@ -39,7 +39,7 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-outline-variant/10">
-              <template v-for="(item, id) in carrito" :key="id">
+              <template v-for="item in cartStore.itemsList" :key="item.idProducto">
                 <tr>
                   <td class="py-6">
                     <p class="font-headline font-bold text-primary text-lg">{{ item.nombre }}</p>
@@ -58,7 +58,7 @@
             <div class="w-72 space-y-4">
               <div class="flex justify-between text-sm font-label uppercase tracking-widest opacity-60">
                 <span>Subtotal</span>
-                <span>${{ formatPrice(total) }}</span>
+                <span>${{ formatPrice(cartStore.total) }}</span>
               </div>
               <div class="flex justify-between text-sm font-label uppercase tracking-widest opacity-60">
                 <span>Impuestos (IVA)</span>
@@ -70,7 +70,7 @@
               </div>
               <div class="flex justify-between items-end pt-4">
                 <span class="font-label text-xs uppercase tracking-widest font-bold">Total a Pagar</span>
-                <span class="font-headline text-4xl font-bold italic text-primary">${{ formatPrice(total) }}</span>
+                <span class="font-headline text-4xl font-bold italic text-primary">${{ formatPrice(cartStore.total) }}</span>
               </div>
             </div>
           </div>
@@ -78,9 +78,13 @@
 
         <!-- Acciones -->
         <div class="bg-surface-container-low p-12 flex flex-col items-center gap-6 border-t border-outline-variant/20">
-          <button @click="confirmarPago" class="w-full max-w-md bg-[#2a0002] text-white py-5 rounded-md font-label font-bold uppercase tracking-[0.3em] hover:bg-[#3d0003] active:scale-95 transition-all shadow-2xl flex items-center justify-center gap-4">
-            <span class="material-symbols-outlined">payments</span>
-            Confirmar y Pagar Factura
+          <button
+            @click="confirmarPago"
+            :disabled="procesando"
+            class="w-full max-w-md bg-[#2a0002] text-white py-5 rounded-md font-label font-bold uppercase tracking-[0.3em] hover:bg-[#3d0003] active:scale-95 transition-all shadow-2xl flex items-center justify-center gap-4 disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            <span class="material-symbols-outlined">{{ procesando ? 'hourglass_empty' : 'payments' }}</span>
+            {{ procesando ? 'Procesando...' : 'Confirmar y Pagar Factura' }}
           </button>
           <router-link to="/carrito" class="font-label text-xs uppercase tracking-widest text-secondary hover:text-primary transition-colors flex items-center gap-2">
             <span class="material-symbols-outlined text-sm">arrow_back</span> Regresar al Carrito
@@ -96,43 +100,57 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useCartStore } from '@/stores/cart'
+import { useNotificationStore } from '@/stores/notifications'
 
-const router = useRouter()
-const carrito = ref({})
+const router      = useRouter()
+const cartStore   = useCartStore()
+const notifStore  = useNotificationStore()
+
 const currentDate = ref('')
-
-const total = computed(() => {
-  return Object.values(carrito.value).reduce((sum, item) => sum + (item.precio * item.cantidad), 0)
-})
+const procesando  = ref(false)
 
 const formatPrice = (price) => parseFloat(price).toFixed(2)
 
 const confirmarPago = async () => {
+  if (cartStore.itemsList.length === 0) {
+    notifStore.show('El carrito está vacío', 'error')
+    return
+  }
+
+  procesando.value = true
   try {
-    const response = await fetch('/api/checkout/pay', {
+    // Construir payload con la estructura que espera el backend
+    const carritoPayload = {}
+    cartStore.itemsList.forEach(item => {
+      carritoPayload[item.idProducto] = item
+    })
+
+    const response = await fetch('/api/v1/checkout/pay', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ carrito: carrito.value })
+      body: JSON.stringify({ carrito: carritoPayload })
     })
     const data = await response.json()
+
     if (data.success) {
-      window.showNotification('¡Pedido confirmado! Gracias por tu compra.')
-      localStorage.removeItem('carrito')
-      window.dispatchEvent(new Event('cart-updated'))
+      cartStore.clear()
+      notifStore.show('¡Pedido confirmado! Gracias por tu compra.', 'success')
       setTimeout(() => router.push('/'), 2000)
     } else {
-      window.showNotification('Error al procesar el pago', 'error')
+      notifStore.show(data.message || 'Error al procesar el pago', 'error')
     }
   } catch (error) {
     console.error('Error:', error)
-    window.showNotification('Error al procesar el pago', 'error')
+    notifStore.show('Error al procesar el pago. Intenta de nuevo.', 'error')
+  } finally {
+    procesando.value = false
   }
 }
 
 onMounted(() => {
-  carrito.value = JSON.parse(localStorage.getItem('carrito') || '{}')
   const now = new Date()
   currentDate.value = `${String(now.getDate()).padStart(2, '0')} / ${String(now.getMonth() + 1).padStart(2, '0')} / ${now.getFullYear()}`
 })

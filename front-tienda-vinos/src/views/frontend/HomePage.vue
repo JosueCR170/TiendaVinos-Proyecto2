@@ -69,11 +69,11 @@
             <article
               v-for="(producto, index) in destacados"
               :key="producto.id_producto"
-              class="group bg-white p-8 rounded-md transition-all hover:shadow-2xl hover:-translate-y-2"
+              class="group transition-all hover:-translate-y-2"
               :class="index === 1 ? 'lg:translate-y-12' : ''"
             >
               <RouterLink :to="`/catalogo/${producto.id_producto}`" class="block">
-                <div class="aspect-[3/4] mb-8 overflow-hidden rounded-lg bg-[#f5f5dc] relative p-6 flex items-center justify-center">
+                <div class="aspect-[3/4] mb-4 overflow-hidden rounded-lg bg-[#f5f5dc] relative p-6 flex items-center justify-center">
                   <img v-if="producto.imagen_url"
                        :alt="producto.nombre"
                        :src="producto.imagen_url"
@@ -95,7 +95,7 @@
               <div class="mt-4 flex justify-between items-center">
                 <span class="text-lg font-body text-[#745853]">${{ fmt(producto.precio) }}</span>
                 <button v-if="producto.cantidad > 0"
-                        @click="addToCart(producto.id_producto)"
+                        @click="addToCart(producto)"
                         class="p-2 rounded-full hover:bg-[#eaead1] transition-colors text-[#2a0002] active:scale-90">
                   <span class="material-symbols-outlined">add_shopping_cart</span>
                 </button>
@@ -122,10 +122,10 @@
             <article
               v-for="producto in descuentos"
               :key="producto.id_producto"
-              class="group bg-white p-8 rounded-md transition-all hover:shadow-2xl hover:-translate-y-2"
+              class="group transition-all hover:-translate-y-2"
             >
               <RouterLink :to="`/catalogo/${producto.id_producto}`" class="block">
-                <div class="aspect-[3/4] mb-8 overflow-hidden rounded-lg bg-[#f5f5dc] relative p-6 flex items-center justify-center">
+                <div class="aspect-[3/4] mb-4 overflow-hidden rounded-lg bg-[#f5f5dc] relative p-6 flex items-center justify-center">
                   <img v-if="producto.imagen_url"
                        :alt="producto.nombre"
                        :src="producto.imagen_url"
@@ -156,7 +156,7 @@
                   </span>
                 </div>
                 <button v-if="producto.cantidad > 0"
-                        @click="addToCart(producto.id_producto)"
+                        @click="addToCart(producto)"
                         class="p-2 rounded-full hover:bg-[#eaead1] transition-colors text-[#2a0002] active:scale-90">
                   <span class="material-symbols-outlined">add_shopping_cart</span>
                 </button>
@@ -254,9 +254,14 @@ async function fetchHome() {
   }
 }
 
-async function addToCart(id) {
+async function addToCart(producto) {
   try {
-    const data = await cartStore.addItem(id)
+    const precioFinal = producto.descuento > 0 ? producto.precio * (1 - producto.descuento / 100) : producto.precio
+    const data = await cartStore.addItem(producto.id_producto, {
+      nombre: producto.nombre,
+      precio: precioFinal,
+      imagen: producto.imagen_url
+    })
     notifStore.show(data.mensaje ?? 'Producto agregado al carrito')
   } catch {
     notifStore.show('Error al agregar al carrito', 'error')

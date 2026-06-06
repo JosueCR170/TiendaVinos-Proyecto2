@@ -5,11 +5,11 @@
         <p class="text-on-surface/60 mt-4 font-body text-lg italic">Vinos seleccionados listos para ser descorchados.</p>
       </header>
 
-      <template v-if="carrito && Object.keys(carrito).length > 0">
+      <template v-if="cartStore.itemsList.length > 0">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-16">
           <!-- Listado de Productos -->
           <div class="lg:col-span-8 space-y-8">
-            <template v-for="(item, id) in carrito" :key="id">
+            <template v-for="item in cartStore.itemsList" :key="item.idProducto">
               <article class="flex items-center gap-8 bg-surface-container-low p-6 rounded-lg shadow-sm border border-outline-variant/10">
                 <div class="w-24 h-32 bg-surface-container rounded overflow-hidden flex-shrink-0">
                   <template v-if="item.imagen">
@@ -27,11 +27,11 @@
                   
                   <div class="flex items-center gap-6 mt-4">
                     <div class="flex items-center border border-outline-variant/30 rounded-md bg-white overflow-hidden">
-                      <button @click="decrementarCantidad(id)" :disabled="item.cantidad <= 1" class="px-3 py-1 text-primary hover:bg-surface-container transition-colors border-r border-outline-variant/30" :class="{ 'opacity-30 pointer-events-none': item.cantidad <= 1 }">-</button>
+                      <button @click="cartStore.decrement(item.idProducto)" class="px-3 py-1 text-primary hover:bg-surface-container transition-colors border-r border-outline-variant/30" :class="{ 'opacity-30 pointer-events-none': item.cantidad <= 1 }">-</button>
                       <span class="px-4 py-1 font-bold text-sm min-w-[3rem] text-center">{{ item.cantidad }}</span>
-                      <button @click="incrementarCantidad(id)" class="px-3 py-1 text-primary hover:bg-surface-container transition-colors border-l border-outline-variant/30">+</button>
+                      <button @click="cartStore.increment(item.idProducto)" class="px-3 py-1 text-primary hover:bg-surface-container transition-colors border-l border-outline-variant/30">+</button>
                     </div>
-                    <button @click="eliminarDelCarrito(id)" class="text-xs font-label uppercase tracking-widest text-secondary hover:text-red-600 transition-colors flex items-center gap-1">
+                    <button @click="cartStore.remove(item.idProducto)" class="text-xs font-label uppercase tracking-widest text-secondary hover:text-red-600 transition-colors flex items-center gap-1">
                       <span class="material-symbols-outlined text-sm">delete</span> Eliminar
                     </button>
                   </div>
@@ -57,7 +57,7 @@
               <div class="space-y-4 mb-8">
                 <div class="flex justify-between text-sm font-label uppercase tracking-widest opacity-80">
                   <span>Subtotal</span>
-                  <span>${{ formatPrice(total) }}</span>
+                  <span>${{ formatPrice(cartStore.total) }}</span>
                 </div>
                 <div class="flex justify-between text-sm font-label uppercase tracking-widest opacity-80">
                   <span>Envío</span>
@@ -67,7 +67,7 @@
               
               <div class="border-t border-white/20 pt-6 mb-10 flex justify-between items-end">
                 <span class="font-label text-xs uppercase tracking-widest opacity-60">Total Estimado</span>
-                <span class="font-headline text-4xl font-bold italic text-[#e4e4cc]">${{ formatPrice(total) }}</span>
+                <span class="font-headline text-4xl font-bold italic text-[#e4e4cc]">${{ formatPrice(cartStore.total) }}</span>
               </div>
               
               <router-link to="/checkout" class="w-full bg-[#e4e4cc] text-[#2a0002] py-4 rounded-md font-label font-bold uppercase tracking-[0.2em] hover:bg-white transition-all active:scale-95 shadow-lg block text-center">
@@ -95,46 +95,9 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { useCartStore } from '@/stores/cart'
 
-const carrito = ref({})
-
-const total = computed(() => {
-  return Object.values(carrito.value).reduce((sum, item) => sum + (item.precio * item.cantidad), 0)
-})
+const cartStore = useCartStore()
 
 const formatPrice = (price) => parseFloat(price).toFixed(2)
-
-const cargarCarrito = () => {
-  carrito.value = JSON.parse(localStorage.getItem('carrito') || '{}')
-}
-
-const guardarCarrito = () => {
-  localStorage.setItem('carrito', JSON.stringify(carrito.value))
-  window.dispatchEvent(new Event('cart-updated'))
-}
-
-const incrementarCantidad = (id) => {
-  if (carrito.value[id]) {
-    carrito.value[id].cantidad++
-    guardarCarrito()
-  }
-}
-
-const decrementarCantidad = (id) => {
-  if (carrito.value[id] && carrito.value[id].cantidad > 1) {
-    carrito.value[id].cantidad--
-    guardarCarrito()
-  }
-}
-
-const eliminarDelCarrito = (id) => {
-  delete carrito.value[id]
-  carrito.value = { ...carrito.value }
-  guardarCarrito()
-}
-
-onMounted(() => {
-  cargarCarrito()
-})
 </script>

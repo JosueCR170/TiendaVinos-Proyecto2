@@ -179,7 +179,7 @@
             <!-- Botón rápido carrito -->
             <button
               v-if="producto.cantidad > 0"
-              @click="addToCart(producto.id_producto)"
+              @click="addToCart(producto)"
               class="cart-quick-btn"
             >
               <span class="material-symbols-outlined">add_shopping_cart</span>
@@ -398,9 +398,14 @@ function syncUrl() {
   })
 }
 
-async function addToCart(id) {
+async function addToCart(producto) {
   try {
-    const data = await cartStore.addItem(id)
+    const precioFinal = producto.descuento > 0 ? producto.precio * (1 - producto.descuento / 100) : producto.precio
+    const data = await cartStore.addItem(producto.id_producto, {
+      nombre: producto.nombre,
+      precio: precioFinal,
+      imagen: producto.imagen_url
+    })
     notifStore.show(data.mensaje ?? 'Producto agregado al carrito')
   } catch {
     notifStore.show('Error al agregar al carrito', 'error')
