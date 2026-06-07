@@ -62,7 +62,7 @@
                 <select v-model="form.id_categoria" id="id_categoria" class="premium-select" required>
                   <option value="" disabled>Seleccionar...</option>
                   <option v-for="cat in categorias" :key="cat.id_categoria" :value="cat.id_categoria">
-                    {{ cat.nombre }}{{ cat.nombre_padre ? ` (de ${cat.nombre_padre})` : '' }}
+                    {{ cat.nombre }}
                   </option>
                 </select>
               </div>
