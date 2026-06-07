@@ -104,6 +104,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import { useNotificationStore } from '@/stores/notifications'
+import api from '@/services/api'
 
 const router      = useRouter()
 const cartStore   = useCartStore()
@@ -128,12 +129,8 @@ const confirmarPago = async () => {
       carritoPayload[item.idProducto] = item
     })
 
-    const response = await fetch('/api/v1/pedidos', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ carrito: carritoPayload })
-    })
-    const data = await response.json()
+    const response = await api.post('v1/pedidos', { carrito: carritoPayload })
+    const data = response.data
 
     if (data.success) {
       cartStore.clear()
