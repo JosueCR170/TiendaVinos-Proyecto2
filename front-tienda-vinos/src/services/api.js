@@ -1,9 +1,5 @@
 import axios from 'axios'
 
-/**
- * Instancia axios configurada para el backend Laravel.
- * Usa el proxy de Vite en desarrollo (/api → localhost:8000/api).
- */
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL ?? '/api',
   headers: {
@@ -13,9 +9,29 @@ const api = axios.create({
   withCredentials: true,
 })
 
-// Interceptor de respuesta: maneja errores globalmente
+const STORAGE_BASE = import.meta.env.VITE_STORAGE_URL ?? 'http://127.0.0.1:8000'
+
+// Función para convertir URLs relativas a absolutas
+const resolverUrls = (obj) => {
+  if (!obj || typeof obj !== 'object') return obj
+  for (const key in obj) {
+    if (typeof obj[key] === 'string' && obj[key].startsWith('/storage/')) {
+      obj[key] = `${STORAGE_BASE}${obj[key]}`
+    } else if (typeof obj[key] === 'object') {
+      resolverUrls(obj[key])
+    }
+  }
+  return obj
+}
+
+// Interceptor de respuesta: maneja errores y convierte URLs de storage
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    if (response.data) {
+      resolverUrls(response.data)
+    }
+    return response
+  },
   (error) => {
     const mensaje = error.response?.data?.message ?? error.message ?? 'Error desconocido'
     console.error('[API Error]', error.response?.status, mensaje)
@@ -49,7 +65,6 @@ api.interceptors.request.use(
       config.headers['X-CSRF-TOKEN'] = token
     }
 
-    // Si es FormData, remover Content-Type para que axios lo maneje automáticamente
     if (config.data instanceof FormData) {
       delete config.headers['Content-Type']
     }
