@@ -132,7 +132,7 @@
               <div class="valuation-item">
                 <label for="precio">Precio Unitario</label>
                 <div class="valuation-input-wrapper">
-                  <span class="currency-symbol">₡</span>
+                  <span class="currency-symbol">$</span>
                   <input v-model.number="form.precio" type="number" step="0.01" id="precio" class="large-input" placeholder="0.00" required>
                 </div>
               </div>
