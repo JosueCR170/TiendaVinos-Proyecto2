@@ -210,7 +210,7 @@ class ProductoController extends Controller
         try {
 
             $validated = $this->validateProducto($request);
-            $validated['estado'] = $request->has('estado') ? 1 : 0;
+            $validated['estado'] = $request->boolean('estado') ? 1 : 0;
 
             $producto = Producto::create($validated);
 
@@ -256,7 +256,7 @@ class ProductoController extends Controller
         try {
 
             $validated = $this->validateProducto($request);
-            $validated['estado'] = $request->has('estado') ? 1 : 0;
+            $validated['estado'] = $request->boolean('estado') ? 1 : 0;
 
             $producto->update($validated);
 
@@ -371,6 +371,8 @@ class ProductoController extends Controller
             'alcohol_porcentaje' => 'nullable|numeric|min:0|max:100',
             'contenido_ml' => 'nullable|integer|min:0',
             'anio_cosecha' => 'nullable|integer|min:1900|max:' . (date('Y') + 1),
+            'pais' => 'nullable|string|max:100',
+            'region' => 'nullable|string|max:150',
             'imagen_url' => 'nullable|max:500',
         ], [
             'nombre.required' => 'El nombre del producto es obligatorio.',
