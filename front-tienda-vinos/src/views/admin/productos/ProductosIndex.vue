@@ -391,9 +391,9 @@ function sortIcon(field) {
 }
 
 function formatPrice(value) {
-  return new Intl.NumberFormat('es-CR', {
+  return new Intl.NumberFormat('en-US', {
     style:    'currency',
-    currency: 'CRC',
+    currency: 'USD',
     minimumFractionDigits: 2,
   }).format(value)
 }
@@ -528,7 +528,9 @@ async function confirmDelete() {
     }
 
     notif.show('Producto eliminado de la bodega', 'success')
-    closeDeleteModal()
+      // quitar estado de carga antes de cerrar el modal para permitir el cierre
+      deleteModal.loading = false
+      closeDeleteModal()
     // Si la página actual queda vacía al borrar el último ítem, retroceder una página
     const isLastItemOnPage = productos.value.length === 1 && pagination.currentPage > 1
     await fetchProductos()

@@ -48,10 +48,10 @@
               </div>
               <div class="form-group">
                 <label for="pais">País de Origen</label>
-                <input v-model="form.pais" list="paises-list" id="pais" class="premium-datalist-input" placeholder="Buscar país...">
-                <datalist id="paises-list">
-                  <option v-for="pais in paises" :key="pais" :value="pais"></option>
-                </datalist>
+                <select v-model="form.pais" id="pais" class="premium-select" required>
+                  <option value="" disabled>Seleccionar país...</option>
+                  <option v-for="pais in paises" :key="pais" :value="pais">{{ pais }}</option>
+                </select>
               </div>
               <div class="form-group">
                 <label for="region">Región / Terroir</label>
@@ -240,13 +240,23 @@ const form = reactive({
 
 async function fetchData() {
   try {
+    console.log('ProductosEdit: route id=', id)
+    if (!id) {
+      throw new Error('ID de producto inválido en la URL.')
+    }
     const [formData, productData] = await Promise.all([
       ProductoController.obtenerFormData(),
       ProductoController.obtenerProductoPorId(id)
     ])
 
-    if (!formData.success || !productData.success) {
-      throw new Error(formData.message || productData.message)
+    if (!formData.success) {
+      console.error('ProductosEdit: formulario error', formData)
+      throw new Error(formData.message || 'Error cargando datos auxiliares')
+    }
+
+    if (!productData.success) {
+      console.error('ProductosEdit: producto error', productData)
+      throw new Error(productData.message || 'Producto no encontrado.')
     }
 
     categorias.value = formData.categorias
@@ -267,10 +277,10 @@ async function fetchData() {
     form.alcohol_porcentaje = p.alcohol_porcentaje
     form.contenido_ml = p.contenido_ml
     form.imagen_url = p.imagen_url || ''
-    form.estado = p.estado === 1
+    form.estado = Number(p.estado) === 1
   } catch (err) {
-    error.value = 'Error al cargar los datos del producto.'
-    console.error(err)
+    error.value = err.message || 'Error al cargar los datos del producto.'
+    console.error('ProductosEdit.fetchData error:', err)
   } finally {
     loadingForm.value = false
   }

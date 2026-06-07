@@ -46,13 +46,13 @@
                 <label for="anio_cosecha">Cosecha (Vintage)</label>
                 <input v-model.number="form.anio_cosecha" type="number" id="anio_cosecha" placeholder="2018">
               </div>
-              <div class="form-group">
-                <label for="pais">País de Origen</label>
-                <input v-model="form.pais" list="paises-list" id="pais" class="premium-datalist-input" placeholder="Buscar país...">
-                <datalist id="paises-list">
-                  <option v-for="pais in paises" :key="pais" :value="pais"></option>
-                </datalist>
-              </div>
+                          <div class="form-group">
+                            <label for="pais">País de Origen</label>
+                            <select v-model="form.pais" id="pais" class="premium-select" required>
+                              <option value="" disabled>Seleccionar país...</option>
+                              <option v-for="pais in paises" :key="pais" :value="pais">{{ pais }}</option>
+                            </select>
+                          </div>
               <div class="form-group">
                 <label for="region">Región / Terroir</label>
                 <input v-model="form.region" type="text" id="region" placeholder="Bordeaux">

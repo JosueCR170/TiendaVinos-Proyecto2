@@ -78,7 +78,7 @@
                   <span class="material-symbols-outlined">edit</span>
                 </router-link>
                 <button 
-                  @click="confirmDelete(item)"
+                  @click="openDeleteModal(item)"
                   class="action-btn delete"
                   title="Eliminar"
                 >
@@ -95,6 +95,25 @@
         </tbody>
       </table>
     </div>
+      <Teleport to="body">
+        <div v-if="deleteModal.visible" class="modal-overlay" @click.self="closeDeleteModal">
+          <div class="modal-content">
+            <div class="modal-header-icon">
+              <span class="material-symbols-outlined">warning</span>
+            </div>
+            <h2>¿Eliminar Variedad?</h2>
+            <p>Estás a punto de eliminar <strong>{{ deleteModal.item?.nombre }}</strong>. Esta acción es irreversible.</p>
+            <div class="modal-warning">
+              <span class="material-symbols-outlined" style="font-size: 16px;">info</span>
+              <span>Si la variedad está asociada a productos, la eliminación fallará.</span>
+            </div>
+            <div class="modal-actions">
+              <button class="btn-modal-cancel" @click="closeDeleteModal" :disabled="deleteModal.loading">Cancelar</button>
+              <button class="btn-modal-confirm" :disabled="deleteModal.loading" @click="confirmDelete">{{ deleteModal.loading ? 'Eliminando...' : 'Eliminar Permanentemente' }}</button>
+            </div>
+          </div>
+        </div>
+      </Teleport>
   </div>
 </template>
 
@@ -135,19 +154,29 @@ async function fetchItems() {
     loading.value = false
   }
 }
+const deleteModal = ref({ visible: false, item: null, loading: false })
 
-async function confirmDelete(item) {
-  if (!confirm(`¿Estás seguro de eliminar la variedad "${item.nombre}"?`)) return
+function openDeleteModal(item) {
+  deleteModal.value = { visible: true, item, loading: false }
+}
+
+function closeDeleteModal() {
+  if (deleteModal.value.loading) return
+  deleteModal.value = { visible: false, item: null, loading: false }
+}
+
+async function confirmDelete() {
+  if (!deleteModal.value || !deleteModal.value.item) return
+  deleteModal.value.loading = true
   try {
-    const result = await VariedadController.eliminarVariedad(item.id_variedad)
-
-    if (!result.success) {
-      throw new Error(result.message)
-    }
-
+    const result = await VariedadController.eliminarVariedad(deleteModal.value.item.id_variedad)
+    if (!result.success) throw new Error(result.message)
     notif.show('Variedad eliminada con éxito.', 'success')
-    fetchItems()
+    deleteModal.value.loading = false
+    closeDeleteModal()
+    await fetchItems()
   } catch (err) {
+    deleteModal.value.loading = false
     const msg = err.message || 'Error al eliminar la variedad. Puede estar en uso.'
     notif.show(msg, 'error')
   }

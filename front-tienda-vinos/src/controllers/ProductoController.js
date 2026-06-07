@@ -2,6 +2,7 @@ import BaseController from './BaseController'
 import CategoriaController from './CategoriaController'
 import MarcaController from './MarcaController'
 import VariedadController from './VariedadController'
+import api from '@/services/api'
 import { Producto } from '@/models'
 
 class ProductoController extends BaseController {
@@ -38,35 +39,19 @@ class ProductoController extends BaseController {
   }
 
   async obtenerFormData() {
-    const [categoriasResponse, marcasResponse, variedadesResponse, productosResponse] = await Promise.all([
-      CategoriaController.obtenerCategorias({ per_page: 100, sort_by: 'nombre' }),
-      MarcaController.obtenerMarcas({ per_page: 100, sort_by: 'nombre' }),
-      VariedadController.obtenerVariedades({ per_page: 100, sort_by: 'nombre' }),
-      this.obtenerProductos({ per_page: 100, sort_by: 'pais' }),
-    ])
+    // Prefer backend endpoint that returns form data (categorias, marcas, variedades, paises)
+    const response = await this.request(() => api.get(`${this.resource}/form-data`))
 
-    const paises = [...new Set(
-      (productosResponse.productos ?? [])
-        .map((producto) => producto.pais)
-        .filter(Boolean)
-    )].sort((a, b) => a.localeCompare(b))
+    const data = response.data ?? {}
 
     return {
-      success: categoriasResponse.success &&
-        marcasResponse.success &&
-        variedadesResponse.success &&
-        productosResponse.success,
-      message: 'Datos del formulario obtenidos correctamente.',
-      categorias: categoriasResponse.categorias ?? [],
-      marcas: marcasResponse.marcas ?? [],
-      variedades: variedadesResponse.variedades ?? [],
-      paises,
-      errors: [
-        categoriasResponse,
-        marcasResponse,
-        variedadesResponse,
-        productosResponse,
-      ].filter((response) => !response.success),
+      success: response.success,
+      message: response.message || 'Datos del formulario obtenidos correctamente.',
+      categorias: data.categorias ?? [],
+      marcas: data.marcas ?? [],
+      variedades: data.variedades ?? [],
+      paises: data.paises ?? [],
+      errors: response.success ? [] : [response],
     }
   }
 

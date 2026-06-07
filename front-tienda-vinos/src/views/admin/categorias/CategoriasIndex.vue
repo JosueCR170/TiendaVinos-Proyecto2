@@ -46,7 +46,7 @@
         </thead>
         <tbody>
           <tr 
-            v-for="cat in filteredCategorias" 
+            v-for="cat in displayCategorias" 
             :key="cat.id_categoria"
           >
             <td>
@@ -55,7 +55,6 @@
                 <span v-else class="text-on-surface-variant/40">—</span>
                 <div class="product-name-info">
                   <span class="product-name">{{ cat.nombre }}</span>
-                  <span v-if="cat.descripcion" class="product-meta">{{ cat.descripcion }}</span>
                 </div>
               </div>
             </td>
@@ -85,7 +84,7 @@
                   <span class="material-symbols-outlined">edit</span>
                 </router-link>
                 <button 
-                  @click="confirmDelete(cat)"
+                  @click="openDeleteModal(cat)"
                   class="action-btn delete"
                   title="Eliminar"
                 >
@@ -94,7 +93,7 @@
               </div>
             </td>
           </tr>
-          <tr v-if="filteredCategorias.length === 0">
+          <tr v-if="displayCategorias.length === 0">
             <td colspan="4" class="p-8 text-center text-gray-500">
               No se encontraron categorías.
             </td>
@@ -102,6 +101,25 @@
         </tbody>
       </table>
     </div>
+      <Teleport to="body">
+        <div v-if="deleteModal.visible" class="modal-overlay" @click.self="closeDeleteModal">
+          <div class="modal-content">
+            <div class="modal-header-icon">
+              <span class="material-symbols-outlined">warning</span>
+            </div>
+            <h2>¿Eliminar Categoría?</h2>
+            <p>Estás a punto de eliminar <strong>{{ deleteModal.categoria?.nombre }}</strong>. Esta acción es irreversible.</p>
+            <div class="modal-warning">
+              <span class="material-symbols-outlined" style="font-size: 16px;">info</span>
+              <span>Si la categoría está en uso por productos, la eliminación fallará.</span>
+            </div>
+            <div class="modal-actions">
+              <button class="btn-modal-cancel" @click="closeDeleteModal" :disabled="deleteModal.loading">Cancelar</button>
+              <button class="btn-modal-confirm" :disabled="deleteModal.loading" @click="confirmDelete">{{ deleteModal.loading ? 'Eliminando...' : 'Eliminar Permanentemente' }}</button>
+            </div>
+          </div>
+        </div>
+      </Teleport>
   </div>
 </template>
 
@@ -116,13 +134,50 @@ const loading = ref(true)
 const error = ref(null)
 const searchQuery = ref('')
 
-const filteredCategorias = computed(() => {
-  if (!searchQuery.value) return categorias.value
-  const q = searchQuery.value.toLowerCase()
-  return categorias.value.filter(c => 
-    c.nombre.toLowerCase().includes(q) || 
-    (c.descripcion && c.descripcion.toLowerCase().includes(q))
-  )
+const displayCategorias = computed(() => {
+  const q = searchQuery.value.trim().toLowerCase()
+
+  // helper to match search
+  const matches = (c) => {
+    if (!q) return true
+    return c.nombre.toLowerCase().includes(q) || (c.descripcion && c.descripcion.toLowerCase().includes(q))
+  }
+
+  // if searching, just return filtered and sorted by nombre
+  if (q) {
+    return categorias.value
+      .filter(matches)
+      .sort((a, b) => a.nombre.localeCompare(b.nombre))
+  }
+
+  // No search: group by parent — show each principal category followed by its subcategories
+  const parents = categorias.value.filter(c => c.nivel === 1).sort((a, b) => a.nombre.localeCompare(b.nombre))
+  const children = categorias.value.filter(c => c.nivel !== 1)
+
+  const mapChildren = {}
+  children.forEach(ch => {
+    const pid = ch.padre ? ch.padre.id_categoria : null
+    if (!mapChildren[pid]) mapChildren[pid] = []
+    mapChildren[pid].push(ch)
+  })
+
+  const result = []
+  parents.forEach(p => {
+    result.push(p)
+    const chs = mapChildren[p.id_categoria] || []
+    chs.sort((a, b) => a.nombre.localeCompare(b.nombre))
+    chs.forEach(c => result.push(c))
+  })
+
+  // also include any orphan children or categories without parent at the end
+  const parentIds = new Set(parents.map(p => p.id_categoria))
+  categorias.value.forEach(c => {
+    if (c.nivel !== 1 && (!c.padre || !parentIds.has(c.padre.id_categoria))) {
+      result.push(c)
+    }
+  })
+
+  return result
 })
 
 async function fetchCategorias() {
@@ -142,20 +197,29 @@ async function fetchCategorias() {
     loading.value = false
   }
 }
+const deleteModal = ref({ visible: false, categoria: null, loading: false })
 
-async function confirmDelete(cat) {
-  if (!confirm(`¿Estás seguro de eliminar la categoría "${cat.nombre}"?\nEsta acción no se puede deshacer.`)) return
-  
+function openDeleteModal(cat) {
+  deleteModal.value = { visible: true, categoria: cat, loading: false }
+}
+
+function closeDeleteModal() {
+  if (deleteModal.value.loading) return
+  deleteModal.value = { visible: false, categoria: null, loading: false }
+}
+
+async function confirmDelete() {
+  if (!deleteModal.value || !deleteModal.value.categoria) return
+  deleteModal.value.loading = true
   try {
-    const result = await CategoriaController.eliminarCategoria(cat.id_categoria)
-
-    if (!result.success) {
-      throw new Error(result.message)
-    }
-
+    const result = await CategoriaController.eliminarCategoria(deleteModal.value.categoria.id_categoria)
+    if (!result.success) throw new Error(result.message)
     notif.show('Categoría eliminada con éxito.', 'success')
-    fetchCategorias()
+    deleteModal.value.loading = false
+    closeDeleteModal()
+    await fetchCategorias()
   } catch (err) {
+    deleteModal.value.loading = false
     const msg = err.message || 'Error al eliminar la categoría.'
     notif.show(msg, 'error')
   }
