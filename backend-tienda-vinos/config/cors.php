@@ -19,7 +19,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['https://tiendavinos-proyecto2-frontend-production.up.railway.app'],
+    'allowed_origins' => ['http://localhost:5173','http://127.0.0.1:5173','https://tiendavinos-proyecto2-frontend-production.up.railway.app','https://proyecto3-tiendavinos-production.up.railway.app/'],
 
     'allowed_origins_patterns' => [],
 
